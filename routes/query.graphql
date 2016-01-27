@@ -1,0 +1,30 @@
+query GetAllCountries {
+  countries {
+    id
+    name
+  }
+}
+query GetYearData {
+  data(year: $years, country_id: $country_ids){
+    ...DatumFragment
+  }
+}
+query GetCountryData($id: Integer!) {
+  countries(id: $id){
+    data {
+      ...DatumFragment
+    }
+  }
+}
+
+fragment DatumFragment on Datum {
+  year
+  population
+  gdp
+  total_emissions
+  energy_emissions
+  industrial_emissions
+  agriculture_emissions
+  waste_emissions
+  lucf_emissions 
+}
