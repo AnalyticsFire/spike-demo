@@ -1,40 +1,39 @@
 "use strict";
 
-var fs = require("fs"),
-  models = [],
-  model_path = __dirname + "/../models",
-  files = fs.readdirSync(model_path),
-  Sequelize = require("sequelize"),
-  sequelize = new Sequelize("postgres://spikeuser:123456@localhost:5432/spike_proto", {
-    pool: {
-      max: 5,
-      min: 0,
-      idle: 10000
-    }
-  });
+import fs from "fs";
+import Sequelize from 'sequelize';
+
+var sequelize = new Sequelize("postgres://spikeuser:123456@localhost:5432/spike_proto", {
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000
+  }
+});
+const model_dir = __dirname + '/../models'
 
 class Database {
 
   static sync(){
 
-    // define each model
-    for (var filename of files){
-      var path = model_path + "/" + filename,
-        stats = fs.statSync(path)
-      if (stats.isFile()){
-        models.push(require(path));
-      }
-    }
+    fs.readdirSync(model_dir).forEach(function(file) {
+      model = require(model_dir + '/' + file);
+      Database[model.name] = model;
+      Database.models.push(model);
+    });
+    console.log("!!!! TEST !!!!")
+    console.log(Database.PowerDatum);
 
     // add associations
-    for (var model of models){
+    for (var model of Database.models){
       model.associate();
     }
 
     return sequelize.sync({force: true});
   }
 }
-Database.Sequelize = Sequelize;
 Database.sequelize = sequelize;
+Database.Sequelize = Sequelize;
+Database.models = [];
 
-export Database;
+export default Database;

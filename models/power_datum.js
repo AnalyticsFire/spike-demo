@@ -7,40 +7,38 @@ import {
 
 import {
   fromGlobalId,
-  globalIdField,
-  nodeDefinitions,
+  globalIdField
 } from 'graphql-relay';
 
-import Database from "./../config/database";
-import PowerData from "./house"
+import DB from "./../config/database";
+import {nodeInterface} from './../lib/node.relay';
 
 /**
  * Define your own types here
  */
 
-var PowerDatum = Database.sequelize.define('Datum', {
+var PowerDatum = DB.sequelize.define('PowerDatum', {
   id: {
-    type: Database.Sequelize.INTEGER,
+    type: DB.Sequelize.INTEGER,
     primaryKey: true,
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
-  time: Database.Sequelize.FLOAT,
-  power: Database.Sequelize.FLOAT
+  time: DB.Sequelize.FLOAT,
+  power: DB.Sequelize.FLOAT
 }, {
   tableName: "power_data", 
   instanceMethods: {
 
   },
   classMethods: {
-    associate: function(){
-      PowerDatum.belongsTo(House);
+    associate: ()=>{
+      PowerDatum.belongsTo(DB.House);
     }
   }
 });
 
-
 PowerDatum.graphql_type = new GraphQLObjectType({
-  name: 'Power Datum',
+  name: 'PowerDatum',
   description: 'A person who uses our app',
   fields: () => ({
     id: globalIdField('PowerDatum'),
@@ -49,5 +47,6 @@ PowerDatum.graphql_type = new GraphQLObjectType({
   }),
   interfaces: [nodeInterface],
 });
+PowerDatum.name = 'PowerDatum';
 
-export PowerDatum;
+module.exports = PowerDatum;

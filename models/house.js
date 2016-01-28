@@ -10,28 +10,28 @@ import {
   nodeDefinitions,
 } from 'graphql-relay';
 
-import Database from "./../config/database";
-import PowerData from "./power_datum"
+import DB from "./../config/database";
+import {nodeInterface} from './../lib/node.relay';
 
 /**
  * Define your own types here
  */
 
-var House = Database.sequelize.define('House', {
+var House = DB.sequelize.define('House', {
   id: {
-    type: Database.Sequelize.INTEGER,
+    type: DB.Sequelize.INTEGER,
     primaryKey: true,
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
-  name: Database.Sequelize.STRING
+  name: DB.Sequelize.STRING
 }, {
   tableName: "houses", 
   instanceMethods: {
 
   },
   classMethods: {
-    associate: function(){
-      House.hasMany(PowerDatum, {as: 'PowerData'})
+    associate: ()=>{
+      House.hasMany(DB.PowerDatum, {as: 'PowerData'});
     }
   }
 });
@@ -45,5 +45,5 @@ House.graphql_type = new GraphQLObjectType({
   }),
   interfaces: [nodeInterface],
 });
-
-export House;
+House.name = 'House';
+module.exports = House;
