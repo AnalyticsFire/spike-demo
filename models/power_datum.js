@@ -23,10 +23,10 @@ var PowerDatum = DB.sequelize.define('PowerDatum', {
     primaryKey: true,
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
-  time: DB.Sequelize.FLOAT,
+  time: DB.Sequelize.DATE,
   power: DB.Sequelize.FLOAT
 }, {
-  tableName: "power_data", 
+  tableName: "power_data",
   instanceMethods: {
 
   },

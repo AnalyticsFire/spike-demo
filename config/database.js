@@ -21,8 +21,6 @@ class Database {
       Database[model.name] = model;
       Database.models.push(model);
     });
-    console.log("!!!! TEST !!!!")
-    console.log(Database.PowerDatum);
 
     // add associations
     for (var model of Database.models){
