@@ -1,0 +1,64 @@
+type House implements Node {
+  id: ID!
+  name: String!
+  power_data(after: String, first: Int, before: String, last: Int): PowerDatumConnection
+  habitants(after: String, first: Int, before: String, last: Int): UserConnection
+}
+
+type HouseConnection {
+  pageInfo: PageInfo!
+  edges: [HouseEdge]
+}
+
+type HouseEdge {
+  node: House
+  cursor: String!
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type PowerDatum implements Node {
+  id: ID!
+  power: Float
+  time: Int
+}
+
+type PowerDatumConnection {
+  pageInfo: PageInfo!
+  edges: [PowerDatumEdge]
+}
+
+type PowerDatumEdge {
+  node: PowerDatum
+  cursor: String!
+}
+
+type Query {
+  node(id: ID!): Node
+  viewer: User
+}
+
+type User implements Node {
+  id: ID!
+  username: String!
+  house(after: String, first: Int, before: String, last: Int): HouseConnection
+}
+
+type UserConnection {
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User
+  cursor: String!
+}

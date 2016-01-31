@@ -1,23 +1,23 @@
 import {
   GraphQLFloat,
   GraphQLInt,
-  GraphQLNonNull,
   GraphQLObjectType
 } from 'graphql';
 
 import {
-  fromGlobalId,
   globalIdField
 } from 'graphql-relay';
 
 import DB from "./../config/database";
-import {nodeInterface} from './../lib/node.relay';
+import {nodeInterface} from './../config/graphql/node';
+
+const NAME = 'PowerDatum'
 
 /**
  * Define your own types here
  */
 
-var PowerDatum = DB.sequelize.define('PowerDatum', {
+var PowerDatum = DB.sequelize.define(NAME, {
   id: {
     type: DB.Sequelize.INTEGER,
     primaryKey: true,
@@ -26,27 +26,36 @@ var PowerDatum = DB.sequelize.define('PowerDatum', {
   time: DB.Sequelize.DATE,
   power: DB.Sequelize.FLOAT
 }, {
+  paranoid: true,
+  underscored: true,
   tableName: "power_data",
   instanceMethods: {
 
   },
   classMethods: {
-    associate: ()=>{
+    set: ()=>{
       PowerDatum.belongsTo(DB.House);
+      PowerDatum.graphql_type = new GraphQLObjectType({
+        name: NAME,
+        description: 'A person who uses our app',
+        fields: () => ({
+          id: globalIdField(NAME),
+          power: {
+            type: GraphQLFloat,
+          },
+          time: {
+            type: GraphQLInt,
+            description: "Time the power was recorded.",
+            resolve: (power_datum, _) => {
+              return power_datum.time.getTime();
+            }
+          },
+        }),
+        interfaces: [nodeInterface]
+      });
     }
   }
 });
 
-PowerDatum.graphql_type = new GraphQLObjectType({
-  name: 'PowerDatum',
-  description: 'A person who uses our app',
-  fields: () => ({
-    id: globalIdField('PowerDatum'),
-    time: GraphQLInt,
-    power: GraphQLFloat
-  }),
-  interfaces: [nodeInterface],
-});
-PowerDatum.name = 'PowerDatum';
-
+PowerDatum.name = NAME;
 module.exports = PowerDatum;

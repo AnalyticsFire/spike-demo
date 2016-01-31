@@ -1,23 +1,27 @@
 import {
-  GraphQLString,
   GraphQLNonNull,
-  GraphQLObjectType
+  GraphQLObjectType,
+  GraphQLInt,
+  GraphQLString
 } from 'graphql';
 
 import {
-  fromGlobalId,
   globalIdField,
-  nodeDefinitions,
+  connectionDefinitions,
+  connectionArgs
 } from 'graphql-relay';
 
+import extend from 'extend';
 import DB from "./../config/database";
-import {nodeInterface} from './../lib/node.relay';
+import {nodeInterface} from './../config/graphql/node';
+
+const NAME = 'House';
 
 /**
- * Define your own types here
+ * Sequelize Definition
  */
 
-var House = DB.sequelize.define('House', {
+var House = DB.sequelize.define(NAME, {
   id: {
     type: DB.Sequelize.INTEGER,
     primaryKey: true,
@@ -25,25 +29,63 @@ var House = DB.sequelize.define('House', {
   },
   name: DB.Sequelize.STRING
 }, {
-  tableName: "houses", 
+  paranoid: true,
+  underscored: true,
+  tableName: "houses",
   instanceMethods: {
 
   },
   classMethods: {
-    associate: ()=>{
+    set: ()=>{
       House.hasMany(DB.PowerDatum, {as: 'PowerData'});
+      House.hasMany(DB.User, {as: 'Habitants'});
+      House.graphql_type = new GraphQLObjectType({
+        name: NAME,
+        description: 'A house',
+        fields: () => ({
+          id: globalIdField(NAME),
+          name: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          power_data: {
+            type: connectionDefinitions({name: DB.PowerDatum.name, nodeType: DB.PowerDatum.graphql_type}).connectionType,
+            description: "Returns house's power data.",
+            args: connectionArgs,
+            resolve: (house, args) => {
+              return house.getPowerDataByTime(args);
+            }
+          },
+          habitants: {
+            type: connectionDefinitions({name: DB.User.name, nodeType: DB.User.graphql_type}).connectionType,
+            description: "Returns list of house's habitants.",
+            args: connectionArgs,
+            resolve: (house, args) => {
+              var params = extend({
+                order: 'name ASC',
+                limit: 50,
+                offset: 0,
+              }, args);
+              delete params.where; // don't allow any additional query params.
+              return house.getHabitants(params);
+            }
+          }
+        }),
+        interfaces: [nodeInterface]
+      });
+    },
+    getPowerDataByTime: (start_date, end_date, page)=>{
+      var params = extend({
+        order: 'time ASC',
+        limit: 500
+      }, args.page);
+      params.where = {time: {}};
+      if (start_date) params.where.time.$gt = moment.utc(start_date).toDate();
+      if (end_date) params.where.time.$lt = moment.utc(end_date).toDate();
+
+      return House.getPowerData(params);
     }
   }
 });
 
-House.graphql_type = new GraphQLObjectType({
-  name: 'House',
-  description: 'A house',
-  fields: () => ({
-    id: globalIdField('House'),
-    name: GraphQLNonNull(GraphQLInt)
-  }),
-  interfaces: [nodeInterface],
-});
-House.name = 'House';
+House.name = NAME;
 module.exports = House;

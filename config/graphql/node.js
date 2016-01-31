@@ -1,11 +1,5 @@
-/**
- * We get the node interface and field from the Relay library.
- *
- * The first method defines the way we resolve an ID to its object.
- * The second defines the way we resolve an object to its GraphQL type.
- */
-
 import {
+  fromGlobalId,
   nodeDefinitions,
 } from 'graphql-relay';
 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "babel-node ./app.express.js",
-    "update-schema": "babel-node ./scripts/updateSchema.js"
+    "update-schema": "babel-node --debug ./scripts/updateSchema.js"
   },
   "dependencies": {
     "body-parser": "~1.12.0",

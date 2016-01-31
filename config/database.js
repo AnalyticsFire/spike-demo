@@ -24,10 +24,10 @@ class Database {
 
     // add associations
     for (var model of Database.models){
-      model.associate();
+      model.set();
     }
 
-    return sequelize.sync({force: true});
+    return sequelize.sync();
   }
 }
 Database.sequelize = sequelize;
