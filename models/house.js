@@ -37,42 +37,52 @@ var House = DB.sequelize.define(NAME, {
   },
   classMethods: {
     set: ()=>{
+
+    },
+    associate: ()=>{
       House.hasMany(DB.PowerDatum, {as: 'PowerData'});
       House.hasMany(DB.User, {as: 'Habitants'});
+    },
+    defineGraphQLType: ()=>{
       House.graphql_type = new GraphQLObjectType({
         name: NAME,
         description: 'A house',
-        fields: () => ({
-          id: globalIdField(NAME),
-          name: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          power_data: {
-            type: connectionDefinitions({name: DB.PowerDatum.name, nodeType: DB.PowerDatum.graphql_type}).connectionType,
-            description: "Returns house's power data.",
-            args: connectionArgs,
-            resolve: (house, args) => {
-              return house.getPowerDataByTime(args);
+        fields: () => {
+          var {connectionType: power_data_connection} = connectionDefinitions({name: DB.PowerDatum.name, nodeType: DB.PowerDatum.graphql_type}),
+            {connectionType: habitants_connection} = connectionDefinitions({name: DB.User.name, nodeType: DB.User.graphql_type});
+
+          return {
+            id: globalIdField(NAME),
+            name: {
+              type: new GraphQLNonNull(GraphQLString)
+            },
+            power_data: {
+              type: power_data_connection,
+              description: "Returns house's power data.",
+              args: connectionArgs,
+              resolve: (house, args) => {
+                return house.getPowerDataByTime(args);
+              }
+            },
+            habitants: {
+              type: habitants_connection,
+              description: "Returns list of house's habitants.",
+              args: connectionArgs,
+              resolve: (house, args) => {
+                var params = extend({
+                  order: 'name ASC',
+                  limit: 50,
+                  offset: 0,
+                }, args);
+                delete params.where; // don't allow any additional query params.
+                return house.getHabitants(params);
+              }
             }
-          },
-          habitants: {
-            type: connectionDefinitions({name: DB.User.name, nodeType: DB.User.graphql_type}).connectionType,
-            description: "Returns list of house's habitants.",
-            args: connectionArgs,
-            resolve: (house, args) => {
-              var params = extend({
-                order: 'name ASC',
-                limit: 50,
-                offset: 0,
-              }, args);
-              delete params.where; // don't allow any additional query params.
-              return house.getHabitants(params);
-            }
-          }
-        }),
+          };
+        },
         interfaces: [nodeInterface]
       });
-    },
+    }
     getPowerDataByTime: (start_date, end_date, page)=>{
       var params = extend({
         order: 'time ASC',

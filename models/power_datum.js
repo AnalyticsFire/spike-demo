@@ -34,7 +34,13 @@ var PowerDatum = DB.sequelize.define(NAME, {
   },
   classMethods: {
     set: ()=>{
+      PowerDatum.associate();
+      PowerDatum.defineGraphQLType();
+    },
+    associate: ()=>{
       PowerDatum.belongsTo(DB.House);
+    },
+    defineGraphQLType: ()=>{
       PowerDatum.graphql_type = new GraphQLObjectType({
         name: NAME,
         description: 'A person who uses our app',

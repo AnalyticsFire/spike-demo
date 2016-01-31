@@ -38,25 +38,32 @@ var User = DB.sequelize.define(NAME, {
   },
   classMethods: {
     set: ()=>{
+      User.associate();
+      User.defineGraqhQLType()
+    },
+    associate: ()=>{
       User.belongsTo(DB.House);
+    },
+    defineGraqhQLType: ()=>{
       User.graphql_type = new GraphQLObjectType({
         name: NAME,
         description: 'A house',
-        fields: () => ({
-          id: globalIdField(NAME),
-          username: {
-            type: new GraphQLNonNull(GraphQLString)
-          },
-          house: {
-            type: connectionDefinitions({name: DB.House.name, nodeType: DB.House.graphql_type}).connectionType,
-            description: "Returns user's house.",
-            args: connectionArgs,
-            ref: DB.PowerDatum.name,
-            resolve: (user, args) => {
-              return user.getHouse();
+        fields: () => {
+          var {connectionType: house_connection} = connectionDefinitions({name: DB.House.name, nodeType: DB.House.graphql_type});
+          return {
+            id: globalIdField(NAME),
+            username: {
+              type: new GraphQLNonNull(GraphQLString)
+            },
+            house: {
+              type: house_connection,
+              description: "Returns user's house.",
+              resolve: (user, args) => {
+                return user.getHouse();
+              }
             }
-          }
-        }),
+          };
+        },
         interfaces: [nodeInterface]
       });
     }
