@@ -3,17 +3,16 @@ import {
   nodeDefinitions,
 } from 'graphql-relay';
 
+import DB from './../database'
+
 var {nodeInterface, nodeField} = nodeDefinitions(
   (globalId) => {
-    var {type, id} = fromGlobalId(globalId);
-    return null;
+    var {graphql_type_name, id} = fromGlobalId(globalId),
+      model = DB[graphql_type_name];
+    return model.findOne({where: {id: id}});
   },
-  (obj) => {
-    if (obj instanceof Array) {
-      return Array;
-    } else {
-      return null;
-    }
+  (instance) => {
+    return instance.Model().graphql_type;
   }
 );
 

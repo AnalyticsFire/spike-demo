@@ -16,7 +16,8 @@ const GRAPHQL_PORT = 8080;
 
 var graphql_server = express();
 
-DB.sync.then(()=>{
+DB.sync().then(()=>{
+  console.log("db done syncing")
   // Expose a GraphQL endpoint
   graphql_server.use('/', graphQLHTTP({
     graphiql: true,
@@ -34,7 +35,7 @@ DB.sync.then(()=>{
 
 var compiler = webpack({
   entry: {
-    app: path.resolve(__dirname, 'relay', 'application.js')
+    app: path.resolve(__dirname, 'lib', 'relay', 'app.relay.js')
   },
   module: {
     loaders: [
@@ -99,6 +100,7 @@ dev_server.app.get("/", (req, res, next)=>{
   res.render("index");
 });
 
+console.log("launching dev server")
 dev_server.listen(APP_PORT, () => {
   console.log(`App is now running on http://localhost:${APP_PORT}`);
 });

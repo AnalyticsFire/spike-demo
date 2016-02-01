@@ -15,7 +15,7 @@ export default function(){
       viewer: {
         type: DB.User.graphql_type,
         resolve: (_, args) => {
-          return DB.User.findOne({where: {username: args.username}});
+          return DB.User.findOne({where: {username: 'bethany'}});
         }
       },
     }),
