@@ -50,7 +50,7 @@ type Query {
 type User implements Node {
   id: ID!
   username: String!
-  house(after: String, first: Int, before: String, last: Int): HouseConnection
+  house: HouseConnection
 }
 
 type UserConnection {

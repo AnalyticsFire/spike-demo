@@ -1,7 +1,9 @@
 import gulp from 'gulp';
 import yargs from 'yargs';
+
 import DB from './config/database';
-import {PowerDataSeed, HouseSeed, UserSeed} from './lib/tasks/seed_data'
+import {PowerDataSeed, HouseSeed, UserSeed} from './lib/tasks/seed_data';
+import updateSchema from './lib/tasks/update_schema';
 
 gulp.task('generate_power_csv', function(done){
   DB.sync().then(()=>{

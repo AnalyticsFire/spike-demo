@@ -37,7 +37,8 @@ var House = DB.sequelize.define(NAME, {
   },
   classMethods: {
     set: ()=>{
-
+      House.associate();
+      House.defineGraphQLType();
     },
     associate: ()=>{
       House.hasMany(DB.PowerDatum, {as: 'PowerData'});
@@ -82,7 +83,7 @@ var House = DB.sequelize.define(NAME, {
         },
         interfaces: [nodeInterface]
       });
-    }
+    },
     getPowerDataByTime: (start_date, end_date, page)=>{
       var params = extend({
         order: 'time ASC',
