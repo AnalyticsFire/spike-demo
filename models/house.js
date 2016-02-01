@@ -2,7 +2,8 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLInt,
-  GraphQLString
+  GraphQLString,
+  GraphQLList
 } from 'graphql';
 
 import {
@@ -49,16 +50,13 @@ var House = DB.sequelize.define(NAME, {
         name: NAME,
         description: 'A house',
         fields: () => {
-          var {connectionType: power_data_connection} = connectionDefinitions({name: DB.PowerDatum.name, nodeType: DB.PowerDatum.graphql_type}),
-            {connectionType: habitants_connection} = connectionDefinitions({name: DB.User.name, nodeType: DB.User.graphql_type});
-
           return {
             id: globalIdField(NAME),
             name: {
               type: new GraphQLNonNull(GraphQLString)
             },
             power_data: {
-              type: power_data_connection,
+              type: new GraphQLList(DB.PowerDatum.graphql_type),
               description: "Returns house's power data.",
               args: connectionArgs,
               resolve: (house, args) => {
@@ -66,7 +64,7 @@ var House = DB.sequelize.define(NAME, {
               }
             },
             habitants: {
-              type: habitants_connection,
+              type: new GraphQLList(DB.User.graphql_type),
               description: "Returns list of house's habitants.",
               args: connectionArgs,
               resolve: (house, args) => {

@@ -49,14 +49,13 @@ var User = DB.sequelize.define(NAME, {
         name: NAME,
         description: 'A house',
         fields: () => {
-          var {connectionType: house_connection} = connectionDefinitions({name: DB.House.name, nodeType: DB.House.graphql_type});
           return {
             id: globalIdField(NAME),
             username: {
               type: new GraphQLNonNull(GraphQLString)
             },
             house: {
-              type: house_connection,
+              type: DB.House.graphql_type,
               description: "Returns user's house.",
               resolve: (user, args) => {
                 return user.getHouse();
