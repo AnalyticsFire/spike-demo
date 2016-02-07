@@ -3,7 +3,7 @@
 import fs from "fs";
 import Sequelize from 'sequelize';
 
-var sequelize = new Sequelize("postgres://spikeuser:123456@localhost:5432/spike_proto", {
+var sequelize = new Sequelize("postgres://spikeuser:123456@localhost:5432/spike2", {
   pool: {
     max: 5,
     min: 0,

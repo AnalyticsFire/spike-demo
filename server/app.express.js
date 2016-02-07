@@ -14,19 +14,10 @@ import DB from './config/database';
 const APP_PORT = 3000;
 const GRAPHQL_PORT = 8080;
 
-var graphql_server = express();
+var rest_api = express();
 
 DB.sync().then(()=>{
-  console.log("db done syncing")
-  // Expose a GraphQL endpoint
-  graphql_server.use('/', graphQLHTTP({
-    graphiql: true,
-    pretty: true,
-    schema: schema(),
-  }));
-  graphql_server.listen(GRAPHQL_PORT, () => console.log(
-    `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`
-  ));
+  rest_api
 });
 
 /*
