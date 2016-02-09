@@ -1,1 +1,0 @@
-production_radiation_time_series.widget.js

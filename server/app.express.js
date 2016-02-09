@@ -3,55 +3,26 @@
  */
 
 import express from 'express';
-import graphQLHTTP from 'express-graphql';
 import path from 'path';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import schema from './config/graphql/schema';
 
 import DB from './config/database';
+import routes from './routes';
 
 const APP_PORT = 3000;
-const GRAPHQL_PORT = 8080;
+const JS_PORT = 3000;
 
-var rest_api = express();
+var app = express();
 
 DB.sync().then(()=>{
-  rest_api
-});
 
-/*
- * Compile and Serve Relay App w/ Webpack
- */
-
-var compiler = webpack({
-  entry: {
-    app: path.resolve(__dirname, 'lib', 'relay', 'app.relay.js')
-  },
-  module: {
-    loaders: [
-      {
-        exclude: /node_modules/,
-        loader: 'babel',
-        query: {
-          plugins: ['./build/babelRelayPlugin'],
-        },
-        test: /\.js$/
-      }
-    ]
-  },
-  output: {filename: 'application.js', path: '/'}
-});
-var dev_server = new WebpackDevServer(compiler, {
-  contentBase: '/public/',
-  proxy: {'/graphql': `http://localhost:${GRAPHQL_PORT}`},
-  publicPath: '/assets/js/',
-  stats: {colors: true}
-});
+routes(app);
 
 /*
  * Logging, Cookie, JSON Parsing Middleware
- *
+ */
 
 import favicon from 'serve-favicon';
 import logger from 'morgan';
@@ -59,11 +30,10 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'bodyParser';
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());*/
 
 /*
  *  Serve Vendor Scripts, CSS, and Templates
@@ -71,11 +41,11 @@ app.use(cookieParser());*/
 
 // serve fonts in /assets/fonts
 import assets from "connect-assets";
-dev_server.app.use("/assets/fonts", express.static("node_modules/bootstrap/dist/fonts"));
-dev_server.app.use("/assets/fonts", express.static("node_modules/font-awesome/fonts"));
+app.use("/assets/fonts", express.static("node_modules/bootstrap/dist/fonts"));
+app.use("/assets/fonts", express.static("node_modules/font-awesome/fonts"));
 // serve compiled vendor assets and application.css.
-dev_server.app.use(assets({
-  paths: ["assets/js", "assets/css", "node_modules"],
+app.use(assets({
+  paths: ["./assets/js", "./assets/css", "./../node_modules"],
   build: true,
   buildDir: false,
   //compile: false,
@@ -85,14 +55,13 @@ dev_server.app.use(assets({
 dev_server.app.use('/', express.static(path.resolve(__dirname, 'public')));
 
 // view engine set up
-dev_server.app.set('views', path.join(__dirname, 'views'));
-dev_server.app.set('view engine', 'jade');
-dev_server.app.get("/", (req, res, next)=>{
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+app.get("/", (req, res, next)=>{
   res.render("index");
 });
 
-console.log("launching dev server")
-dev_server.listen(APP_PORT, () => {
+app.listen(APP_PORT, () => {
   console.log(`App is now running on http://localhost:${APP_PORT}`);
 });
 
@@ -101,13 +70,12 @@ dev_server.listen(APP_PORT, () => {
  */
 
 // catch 404 and forward to error handler
-dev_server.use(function(req, res, next) {
+app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-/*
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
@@ -128,7 +96,57 @@ app.use(function(err, req, res, next) {
     message: err.message,
     error: {}
   });
-});*/
+});
+
+});
+
+/*
+ * Development Server
+ */
+
+import ExtractTextPlugin from "extract-text-webpack-plugin";
+
+var compiler = webpack({
+  entry: {
+    app: __dirname + '/../client/app.js',
+    style: __dirname + '/../client/style.scss'
+  },
+  output: {
+    filename: '[name].js',
+    path: __dirname + '/../client/build'
+  },
+  externals: {
+    jquery: "$",
+    d3: "d3"
+  },
+  module: {
+      loaders: [
+          {
+              test: /\.scss$/,
+              loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader")
+          }, {
+              test: /\.css$/,
+              loader: ExtractTextPlugin.extract("style-loader", "css-loader")
+          }
+      ]
+  },
+  // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
+  plugins: [
+      new ExtractTextPlugin("style.css", {
+        allChunks: true
+      })
+  ]
+});
 
 
-module.exports = dev_server;
+var dev_server = new WebpackDevServer(compiler, {
+  contentBase: __dirname + '/../client/build',
+  publicPath: "/assets/",
+  proxy: {
+    '/data': `http://localhost:${APP_PORT}`
+  },
+  stats: {colors: true}
+});
+
+
+module.exports = app;

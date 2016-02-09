@@ -1,0 +1,6 @@
+<div>
+  <select onChange="{this.setView}">
+    <option value="savings">Savings</option>
+    <option value="production">Production</option>
+  </select>
+</div>

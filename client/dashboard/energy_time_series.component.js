@@ -1,1 +1,0 @@
-energy_time_series.widget.js

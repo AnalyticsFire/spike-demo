@@ -24,7 +24,6 @@ class Database {
 
     // add associations
     for (var model of Database.models){
-      console.log(`setting ${model.name}`);
       model.set();
     }
 
