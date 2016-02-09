@@ -34,8 +34,7 @@ export default function (opt) {
         var options = extend({
             filename: file.path,
             sourceFiles: [file.relative],
-            generatedFile: replaceExtension(file.relative),
-            suffix: '.rt'
+            generatedFile: replaceExtension(file.relative)
         }, opt);
 
         if (options.suffix && !options.name) {

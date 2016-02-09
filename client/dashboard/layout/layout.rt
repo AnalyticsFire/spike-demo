@@ -1,4 +1,6 @@
-<div>
+
+<div id="layout">
+  <h1>{this.state.view}</h1>
   <select onChange="{this.setView}">
     <option value="savings">Savings</option>
     <option value="production">Production</option>

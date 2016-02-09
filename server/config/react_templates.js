@@ -1,5 +1,7 @@
-export default {
+var config = {
   modules: 'es6',
-  'target-version': '0.14.3',
-  'suffix': '.rt'
+  targetVersion: '0.14.0',
+  suffix: '.rt'
 };
+
+export default config;

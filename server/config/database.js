@@ -10,15 +10,15 @@ var sequelize = new Sequelize("postgres://spikeuser:123456@localhost:5432/spike2
     idle: 10000
   }
 });
-const model_dir = __dirname + '/../models'
+const MODEL_DIR = __dirname + '/../models'
 
 class Database {
 
   static sync(){
     console.log("syncing db")
-    fs.readdirSync(model_dir).forEach(function(file) {
-      var model = require(model_dir + '/' + file);
-      Database[model.name] = model;
+    fs.readdirSync(MODEL_DIR).forEach(function(file) {
+      var model = require(MODEL_DIR + '/' + file);
+      Database[model.NAME] = model;
       Database.models.push(model);
     });
 

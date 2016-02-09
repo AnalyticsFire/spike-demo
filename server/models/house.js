@@ -1,6 +1,5 @@
 import moment from 'moment-timezone';
 import DB from "./../config/database";
-import {nodeInterface} from './../config/graphql/node';
 
 const NAME = 'House';
 
@@ -76,5 +75,5 @@ var House = DB.sequelize.define(NAME, {
   }
 });
 
-House.name = NAME;
+House.NAME = NAME;
 module.exports = House;

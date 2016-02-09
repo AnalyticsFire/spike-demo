@@ -32,5 +32,5 @@ var EnergyDatum = DB.sequelize.define(NAME, {
   }
 });
 
-EnergyDatum.name = NAME;
+EnergyDatum.NAME = NAME;
 module.exports = EnergyDatum;

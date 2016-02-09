@@ -1,6 +1,6 @@
 import DB from "./../config/database";
 
-const NAME = 'PowerDatum'
+const NAME = 'PowerDatum';
 
 /**
  * Define your own types here
@@ -32,5 +32,5 @@ var PowerDatum = DB.sequelize.define(NAME, {
   }
 });
 
-PowerDatum.name = NAME;
+PowerDatum.NAME = NAME;
 module.exports = PowerDatum;

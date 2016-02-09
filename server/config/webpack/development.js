@@ -1,3 +1,5 @@
+import webpack from 'webpack';
+
 const ROOT = __dirname + '/../../../';
 
 module.exports = {
@@ -17,21 +19,20 @@ module.exports = {
       loaders: [
           {
               test: /\.scss$/,
-              loader: ['style', 'raw', 'sass']
+              loaders: ['style', 'raw', 'sass']
           }, {
               test: /\.css$/,
-              loader: ['style', 'raw']
+              loaders: ['style', 'raw']
+          }, {
+            test: /\.js$/,
+            loader: 'babel'
           }
       ]
   },
   sassLoader: {
     includePaths: [ROOT + 'client', ROOT + 'node_modules']
   },
-  // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
   plugins: [
-      new ExtractTextPlugin("style.css", {
-        allChunks: true
-      }),
       new webpack.ProvidePlugin({
           $: "jquery",
           jQuery: "jquery",

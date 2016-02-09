@@ -6,46 +6,71 @@ import express from 'express';
 import path from 'path';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import schema from './config/graphql/schema';
+import bodyParser from 'body-parser';
+
 
 import DB from './config/database';
 import routes from './routes';
 
+const API_PORT = 8080;
 const APP_PORT = 3000;
-const JS_PORT = 3000;
 
-var app = express();
+var api = express();
+
+/*
+ * Serve API App
+ */
 
 DB.sync().then(()=>{
 
-routes(app);
+  routes(api);
+
+  api.use(bodyParser.json());
+  api.use(bodyParser.urlencoded({ extended: false }));
+
+
+  api.listen(API_PORT, () => {
+    console.log(`API is now running on http://localhost:${API_PORT}`);
+  });
+
+});
+
 
 /*
- * Logging, Cookie, JSON Parsing Middleware
+ * Development Server
  */
 
-import favicon from 'serve-favicon';
-import logger from 'morgan';
-import cookieParser from 'cookie-parser';
-import bodyParser from 'bodyParser';
-
-// uncomment after placing your favicon in /public
-app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+var config = require('./config/webpack/development'),
+  dev_server = new WebpackDevServer(webpack(config), {
+    contentBase: __dirname + '/../client/build/development',
+    publicPath: "/assets/",
+    proxy: {
+      '/data': `http://localhost:${APP_PORT}`,
+    },
+    stats: {colors: true}
+  }),
+  app = dev_server.app;
 
 /*
  *  Serve Vendor Scripts, CSS, and Templates
  */
 
+import favicon from 'serve-favicon';
+import logger from 'morgan';
+
+// uncomment after placing your favicon in /public
+app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(logger('dev'));
+
 // serve fonts in /assets/fonts
 import assets from "connect-assets";
-app.use("/assets/fonts", express.static("node_modules/bootstrap/dist/fonts"));
-app.use("/assets/fonts", express.static("node_modules/font-awesome/fonts"));
+
+// TODO: These routes need to match references in the bootstrap and font awesome files.
+app.use("/assets/fonts", express.static("bootstrap/dist/fonts"));
+app.use("/assets/fonts", express.static("font-awesome/fonts"));
 // serve compiled vendor assets and application.css.
 app.use(assets({
-  paths: ["./assets/js", "./assets/css", "./../node_modules"],
+  paths: ["./../node_modules"],
   build: true,
   buildDir: false,
   //compile: false,
@@ -61,9 +86,6 @@ app.get("/", (req, res, next)=>{
   res.render("index");
 });
 
-app.listen(APP_PORT, () => {
-  console.log(`App is now running on http://localhost:${APP_PORT}`);
-});
 
 /*
  * Handle Errors
@@ -98,55 +120,8 @@ app.use(function(err, req, res, next) {
   });
 });
 
+dev_server.listen(APP_PORT, () => {
+  console.log(`App is now running on http://localhost:${APP_PORT}`);
 });
-
-/*
- * Development Server
- */
-
-import ExtractTextPlugin from "extract-text-webpack-plugin";
-
-var compiler = webpack({
-  entry: {
-    app: __dirname + '/../client/app.js',
-    style: __dirname + '/../client/style.scss'
-  },
-  output: {
-    filename: '[name].js',
-    path: __dirname + '/../client/build'
-  },
-  externals: {
-    jquery: "$",
-    d3: "d3"
-  },
-  module: {
-      loaders: [
-          {
-              test: /\.scss$/,
-              loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader")
-          }, {
-              test: /\.css$/,
-              loader: ExtractTextPlugin.extract("style-loader", "css-loader")
-          }
-      ]
-  },
-  // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
-  plugins: [
-      new ExtractTextPlugin("style.css", {
-        allChunks: true
-      })
-  ]
-});
-
-
-var dev_server = new WebpackDevServer(compiler, {
-  contentBase: __dirname + '/../client/build',
-  publicPath: "/assets/",
-  proxy: {
-    '/data': `http://localhost:${APP_PORT}`
-  },
-  stats: {colors: true}
-});
-
 
 module.exports = app;

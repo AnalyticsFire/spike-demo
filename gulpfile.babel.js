@@ -27,9 +27,9 @@ gulp.task('save_house_csv', function(done){
 });
 
 gulp.task('compile_react_templates', function() {
-    gulp.src('./client/react/**/*.rt')
+    gulp.src('./client/dashboard/**/*.rt')
         .pipe(rtCompile(rt_config))
-        .pipe(gulp.dest('./client/react'));
+        .pipe(gulp.dest('./client/dashboard'));
 });
 
 

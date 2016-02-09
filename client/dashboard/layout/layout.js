@@ -1,7 +1,11 @@
+import React from 'react';
+
 import layoutRt from './layout.rt.js';
 
 var Layout = React.createClass({
-  getInitialState: function() {
+
+  getInitialState: function(){
+    return {view: "????"};
   },
 
   handleResize: function(e) {
@@ -14,11 +18,12 @@ var Layout = React.createClass({
 
   setView: function(event) {
     var layout = this;
+    console.log(event.target.value)
     layout.setState({view: event.target.value});
   },
 
   render: function() {
-    return layoutRt.bind(this);
+    return layoutRt.call(this);
   }
 });
 
