@@ -11,10 +11,6 @@ module.exports = {
     filename: '[name].js',
     path: ROOT + 'client/build/development'
   },
-  externals: {
-    jquery: "$",
-    d3: "d3"
-  },
   module: {
       loaders: [
           {
@@ -26,6 +22,9 @@ module.exports = {
           }, {
             test: /\.js$/,
             loader: 'babel'
+          }, {
+            test: /\.json$/,
+            loader: 'json-loader'
           }
       ]
   },
@@ -37,6 +36,10 @@ module.exports = {
           $: "jquery",
           jQuery: "jquery",
           "window.jQuery": "jquery"
+      }),
+      new webpack.ProvidePlugin({
+          d3: "d3",
+          "window.d3": "d3"
       })
   ]
 }

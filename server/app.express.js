@@ -45,7 +45,7 @@ var config = require('./config/webpack/development'),
     contentBase: __dirname + '/../client/build/development',
     publicPath: "/assets/",
     proxy: {
-      '/data': `http://localhost:${APP_PORT}`,
+      '/data*': `http://localhost:${API_PORT}`,
     },
     stats: {colors: true}
   }),

@@ -1,8 +1,54 @@
-
 <div id="layout">
-  <h1>{this.state.view}</h1>
-  <select onChange="{this.setView}">
-    <option value="savings">Savings</option>
-    <option value="production">Production</option>
-  </select>
+  <div class="alert alert-warning" rt-if="this.state.requesting_data">Loading data...</div>
+  <h1 rt-if="this.state.house">{this.state.house.name}</h1>
+  <h3 rt-if="this.state.view">{this.view_name}</h3>
+
+  <div>
+    <select class="form-control" onChange="{this.setView}">
+      <option rt-repeat="view in this.state.views" value="{view[0]}" key="view-{view[0]}">{view[1]}</option>
+    </select>
+  </div>
+  <div rt-if="this.state.houses">
+    <select class="form-control" onChange="{this.setHouse}">
+      <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.react_key}">{house.data.name}</option>
+    </select>
+  </div>
+
+  <table class="table" rt-if="this.state.view === 'energy' && this.state.house">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Day</th>
+        <th>Consumption (Wh)</th>
+        <th>Production (Wh)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr rt-repeat="energy_datum in this.state.house.energy_data" key="{energy_datum.react_key}">
+        <td></td>
+        <td>{energy_datum.day_to_s}</td>
+        <td>{energy_datum.consumption_to_s}</td>
+        <td>{energy_datum.production_to_s}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="table" rt-if="this.state.view === 'power' && this.state.house">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Time</th>
+        <th>Consumption (W)</th>
+        <th>Production (W)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr rt-repeat="power_datum in this.state.house.power_data" key="{power_datum.react_key}">
+        <td></td>
+        <td>{power_datum.time_to_s}</td>
+        <td>{power_datum.consumption_to_s}</td>
+        <td>{power_datum.production_to_s}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

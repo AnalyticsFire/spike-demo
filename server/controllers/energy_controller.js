@@ -5,10 +5,8 @@ const NAME = 'EnergyController';
 class EnergyController{
 
   static index(req, res){
-    DB.House.findOne({where: {name: req.housename}}).then((house)=>{
-      house.getEnergyDataByTime(req.params.start_time, req.params.end_time).then((energy_data)=>{
-        req.json(energy_data);
-      });
+    DB.EnergyDatum.exposeForHouseAtDates(req.query.house_id, req.query.dates).then((energy_data)=>{
+      req.json({data: energy_data});
     });
   }
 

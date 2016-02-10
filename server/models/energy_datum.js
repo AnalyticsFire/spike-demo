@@ -1,4 +1,6 @@
 import DB from "./../config/database";
+import extend from 'extend';
+import ApiHelper from './../helpers/api_helper';
 
 const NAME = 'EnergyDatum';
 
@@ -20,7 +22,12 @@ var EnergyDatum = DB.sequelize.define(NAME, {
   underscored: true,
   tableName: "energy_data",
   instanceMethods: {
-
+    exposeToApi: ()=>{
+      var energy_datum = this,
+        values = this.dataValues;
+      values.energy_datum = energy_datum.day.getTime() / 1000;
+      return values;
+    }
   },
   classMethods: {
     set: ()=>{
@@ -28,6 +35,18 @@ var EnergyDatum = DB.sequelize.define(NAME, {
     },
     associate: ()=>{
       EnergyDatum.belongsTo(DB.House);
+    },
+    exposeForHouseAtDates: (house_id, dates)=>{
+      var params = {house_id: house_id};
+      extend(params, ApiHelper.datesParamToSequelize(dates, 'day'));
+      return EnergyDatum.findAll({
+        where: params,
+        attributes: ['id', 'production', 'consumption', 'day']
+      }).then((energy_data)=>{
+        return energy_data.map((energy_datum)=>{
+          return energy_datum.exposeToApi();
+        });
+      });
     }
   }
 });

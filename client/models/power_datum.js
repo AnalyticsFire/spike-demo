@@ -1,13 +1,17 @@
 import extend from 'extend';
-
+import moment from 'moment-timezone';
 
 class PowerDatum {
-  __constructor(data, house){
+  constructor(data, house){
     var power_datum = this;
     power_datum.house = house;
+    data.time = moment.tz(data.time, house.data.timezone);
     power_datum.data = data;
-    moment.format(data.time);
-    PowerDatum.store[data.id] power_datum;
+    PowerDatum.store.set(data.id, power_datum);
+  }
+
+  get react_key(){
+    return `power-datum-${this.data.id}`;
   }
 
   get time_to_date(){
@@ -17,6 +21,19 @@ class PowerDatum {
     return moment(moment_tz.toArray()).toDate();
   }
 
+  get time_to_s(){
+    var power_datum = this;
+    return power_datum.data.time.format('YYYY-MM-DD HH:MM');
+  }
+  get consumption_to_s(){
+    var power_datum = this;
+    return Math.round(power_datum.data.consumption);
+  }
+  get production_to_s(){
+    var power_datum = this;
+    return Math.round(power_datum.data.production);
+  }
+
   update(data){
     var power_datum = this,
       house = power_datum.house;
@@ -24,8 +41,8 @@ class PowerDatum {
     extend(power_datum.data, data);
   }
 
-  static updateOrInitialize(id, data, house){
-    var power_datum = PowerDatum.store.get(id);
+  static updateOrInitialize(data, house){
+    var power_datum = PowerDatum.store.get(data.id);
     if (power_datum) power_datum.update(data);
     return power_datum || new PowerDatum(data, house)
   }
@@ -33,3 +50,5 @@ class PowerDatum {
 }
 
 PowerDatum.store = new Map();
+
+export default PowerDatum;

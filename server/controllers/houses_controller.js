@@ -1,12 +1,14 @@
 import DB from './../config/database.js';
 
-const NAME = HousesController;
+const NAME = 'HousesController';
 
-class HousesController{
+class HousesController {
 
   static index(req, res){
-    DB.House.findAll({attributes: ['id', 'name']}).then((houses)=>{
-      res.json(houses);
+    var params = {};
+    if (req.query.ids) query.id = ids;
+    DB.House.findAll({where: params, attributes: ['id', 'name', 'timezone']}).then((houses)=>{
+      res.json({data: houses.map((house)=>{ return house.dataValues; })});
     });
   }
 

@@ -26,7 +26,9 @@ export default class {
   }
 
   static inRange(n, min_max){
-    return n >= min_max[0] && n =< min_max[1];
+    var min = min_max[0],
+      max = min_max[1];
+    return ((n >= min) && (n <= max));
   }
 
 }

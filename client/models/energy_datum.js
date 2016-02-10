@@ -1,13 +1,17 @@
 import extend from 'extend';
-
+import moment from 'moment-timezone';
 
 class EnergyDatum {
-  __constructor(data, house){
+  constructor(data, house){
     var energy_datum = this;
     energy_datum.house = house;
+    data.day = moment.tz(data.day, house.data.timezone);
     energy_datum.data = data;
-    moment.tz(data.day, house.data.timezone);
-    EnergyDatum.store[data.id] energy_datum;
+    EnergyDatum.store.set(data.id, energy_datum);
+  }
+
+  get react_key(){
+    return `energy-datum-${this.data.id}`;
   }
 
   get day_to_date(){
@@ -17,6 +21,21 @@ class EnergyDatum {
     return moment(moment_tz.toArray()).toDate();
   }
 
+  get day_to_s(){
+    var energy_datum = this;
+    return energy_datum.data.day.format('YYYY-MM-DD');
+  }
+
+  get consumption_to_s(){
+    var energy_datum = this;
+    return Math.round(energy_datum.data.consumption);
+  }
+
+  get production_to_s(){
+    var energy_datum = this;
+    return Math.round(energy_datum.data.production);
+  }
+
   update(data){
     var energy_datum = this,
       house = power_datum.house;
@@ -24,11 +43,13 @@ class EnergyDatum {
     extend(energy_datum.data, data);
   }
 
-  static updateOrInitialize(id, data, house){
-    var energy_datum = EnergyDatum.store.get(id);
+  static updateOrInitialize(data, house){
+    var energy_datum = EnergyDatum.store.get(data.id);
     if (energy_datum) energy_datum.update(data);
     return energy_datum || new EnergyDatum(data, house)
   }
 }
 
 EnergyDatum.store = new Map();
+
+export default EnergyDatum;

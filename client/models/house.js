@@ -1,38 +1,56 @@
-import Api from './../api';
-import Store from './../store';
-import ArrayUtil from './../../shared/util/array'
+import extend from 'extend';
 
-class House extends Base {
+import PowerDatum from './power_datum';
+import EnergyDatum from './energy_datum';
+import PowerDataApi from './../api/power_data';
+import EnergyDataApi from './../api/energy_data';
+import HousesApi from './../api/houses';
+import ArrayUtil from './../../shared/utils/array'
+import MathUtil from './../../shared/utils/math'
 
-  __constructor(data, house){
-    var energy_datum = this;
+class House {
+
+  constructor(data){
+    var house = this;
     House.store.set(data.id, house);
     house.data = data;
-    house.energy_data = new Map();
-    house.power_data = new Map();
+    house.energy_data = [];
+    house.power_data = [];
+    house.energy_data_store = new Map();
+    house.power_data_store = new Map();
   }
 
-  ensurePowerData(start_date, end_date){
+  get react_key(){
+    return `house-${this.data.id}`;
+  }
+
+  ensurePowerData(opts){
+    opts = extend({
+      start_date: undefined,
+      end_date: undefined
+    }, opts || {});
     var house = this,
-      date_range = Array.from(house.power_data.keys()),
+      date_range = Array.from(house.power_data_store.keys()),
       min_date = Math.min(date_range),
       max_date = Math.max(date_range),
       query_ranges, cache;
 
-    if (date_range.length === 0) return house.getPowerData({dates: [[start_date, end_date]]})
+    if (date_range.length === 0){
+      return house.getPowerData({dates: [[opts.start_date, opts.end_date]]});
+    }
 
-    query_ranges = MathUtil.minusRange([start_date, end_date], [min_date, max_date]);
+    query_ranges = MathUtil.minusRange([opts.start_date, opts.end_date], [min_date, max_date]);
 
     cache = ArrayUtil.selectMap(date_range, (datum_time)=>{
       return ArrayUtil.all(query_ranges, (query_range)=>{
         !MathUtil.inRange(datum_time, query_range);
-      }));
+      });
     }, (datum_time)=>{
-      return house.power_data.get(datum_time);
+      return house.power_data_store.get(datum_time);
     });
 
     if (query_ranges.length > 0){
-      return house.getPowerData({dates: dates}).then((new_power_data)=>{
+      return house.getPowerData({dates: query_ranges}).then((new_power_data)=>{
         return new_power_data.concat(cache);
       });
     } else return Promise.resolve(cache);
@@ -41,37 +59,42 @@ class House extends Base {
   getPowerData(params){
     var house = this;
     params.house_id = house.data.id;
-    return Api.PowerData.index(params).then((power_data)=>{
+    return PowerDataApi.index(params).then((power_data)=>{
       return power_data.map((power_datum_data)=>{
-        var power_datum = Store.PowerDatum.updateOrInitialize(power_datum_data, house);
-        house.power_data.set(power_datum.data.time, power_datum);
+        var power_datum = PowerDatum.updateOrInitialize(power_datum_data, house);
+        house.power_data_store.set(power_datum.data.time, power_datum);
+        house.power_data.push(power_datum);
         return power_datum;
       });
     });
   }
 
-  ensureEnergyData(start_date, end_date){
+  ensureEnergyData(opts){
+    opts = extend({
+      start_date: undefined,
+      end_date: undefined
+    }, opts || {});
     var house = this,
-      date_range = Array.from(house.energy_data.keys()),
+      date_range = Array.from(house.energy_data_store.keys()),
       min_date = Math.min(date_range),
       max_date = Math.max(date_range),
       query_ranges, cache;
 
-    if (date_range.length === 0) return house.getEnergyData({dates: [[start_date, end_date]]})
+    if (date_range.length === 0) return house.getEnergyData({dates: [[opts.start_date, opts.end_date]]})
 
     query_ranges = MathUtil.minusRange([start_date, end_date], [min_date, max_date]);
 
     cache = ArrayUtil.selectMap(date_range, (datum_day)=>{
       return ArrayUtil.all(query_ranges, (query_range)=>{
-        !MathUtil.inRange(datum_day, query_range);
-      }));
+        return !MathUtil.inRange(datum_day, query_range);
+      });
     }, (datum_day)=>{
-      return house.energy_data.get(datum_day);
+      return house.energy_data_store.get(datum_day);
     });
 
     if (query_ranges.length > 0){
-      return house.getEnergyData({dates: dates}).then((new_energy_data)=>{
-        return new_energy_data.concat(cache);
+      return house.getEnergyData({dates: query_ranges}).then((new_energy_data)=>{
+        return new_energy_data_store.concat(cache);
       });
     } else return Promise.resolve(cache);
   }
@@ -79,10 +102,11 @@ class House extends Base {
   getEnergyData(params){
     var house = this;
     params.house_id = house.data.id;
-    return Api.PowerData.index(params).then((energy_data)=>{
-      return power_data.map((energy_datum_data)=>{
-        var energy_datum = Store.EnergyDatum.updateOrInitialize(energy_datum_data, house);
-        house.energy_data.set(power_datum.time, energy_datum);
+    return EnergyDataApi.index(params).then((energy_data)=>{
+      return energy_data.map((energy_datum_data)=>{
+        var energy_datum = EnergyDatum.updateOrInitialize(energy_datum_data, house);
+        house.energy_data_store.set(power_datum.time, energy_datum);
+        house.energy_data.push(energy_datum);
         return energy_datum;
       });
     });
@@ -100,18 +124,21 @@ class House extends Base {
   }
 
   static ensureHouses(ids){
-    var required_ids = ArrayUtil.diff(ids, House.store.keys()),
+    var required_ids, cached_houses = [];
+    if (ids){
+      required_ids = ArrayUtil.diff(ids, House.store.keys());
       cached_houses = ArrayUtil.diff(ids, required_ids).map((id)=>{ return House.store.get(id); });
-    if (required_ids.length == 0) return Promise.resolve([]);
+    }
+    if (required_ids && required_ids.length == 0) return Promise.resolve([]);
 
-    return House.getHouses(required_ids).then((new_houses){
+    return House.getHouses(required_ids).then((new_houses)=>{
       // if these need to be ordered, then concatenation needs to be merged in order.
       return new_houses.concat(cached_houses);
     });
   }
 
   static getHouses(ids){
-    return Api.HousesApi.index({id: ids}).then((houses_data)=>{
+    return HousesApi.index({id: ids}).then((houses_data)=>{
       return houses_data.map((house_data)=>{
         return new House(house_data);
       });
