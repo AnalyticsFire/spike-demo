@@ -1,0 +1,16 @@
+html, body {
+  height:100%;
+}
+#spike_container {
+  min-height: 100%;
+  position:relative;
+  padding-bottom:100px;
+}
+#spike_footer {
+  width:100%;
+  padding:15px;
+  position:absolute;
+  bottom:0px;
+  border-top:2px solid darkgrey;
+  background-color:#F8F8F8;
+}
