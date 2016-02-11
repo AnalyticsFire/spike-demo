@@ -82,7 +82,7 @@ class House {
 
     if (date_range.length === 0) return house.getEnergyData({dates: [[opts.start_date, opts.end_date]]})
 
-    query_ranges = MathUtil.minusRange([start_date, end_date], [min_date, max_date]);
+    query_ranges = MathUtil.minusRange([opts.start_date, opts.end_date], [min_date, max_date]);
 
     cache = ArrayUtil.selectMap(date_range, (datum_day)=>{
       return ArrayUtil.all(query_ranges, (query_range)=>{
@@ -105,7 +105,7 @@ class House {
     return EnergyDataApi.index(params).then((energy_data)=>{
       return energy_data.map((energy_datum_data)=>{
         var energy_datum = EnergyDatum.updateOrInitialize(energy_datum_data, house);
-        house.energy_data_store.set(power_datum.time, energy_datum);
+        house.energy_data_store.set(energy_datum.day, energy_datum);
         house.energy_data.push(energy_datum);
         return energy_datum;
       });

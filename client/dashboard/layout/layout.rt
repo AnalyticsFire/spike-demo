@@ -19,8 +19,8 @@
       <tr>
         <th></th>
         <th>Day</th>
-        <th>Consumption (Wh)</th>
-        <th>Production (Wh)</th>
+        <th>Consumption (kWh)</th>
+        <th>Production (kWh)</th>
       </tr>
     </thead>
     <tbody>

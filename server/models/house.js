@@ -44,11 +44,10 @@ var House = DB.sequelize.define(NAME, {
           power_data.forEach((power_datum)=>{
             var day = house.timeToDateString(power_datum.time),
               energy_datum = energy_data.get(day) || {production: 0, consumption: 0, day: day, house_id: house.id};
-            energy_datum.production += power_datum.production;
-            energy_datum.consumption += power_datum.consumption;
+            energy_datum.production += power_datum.production / 1000; // convert Wh to kWh
+            energy_datum.consumption += power_datum.consumption / 1000; // convert Wh to kWh
             energy_data.set(day, energy_datum);
           });
-          console.log(Array.from(energy_data.values()))
           return DB.EnergyDatum.bulkCreate(Array.from(energy_data.values()), {validate: true});
         });
     }

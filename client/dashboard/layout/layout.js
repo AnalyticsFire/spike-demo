@@ -35,8 +35,9 @@ var Layout = React.createClass({
     var layout = this,
       view = event.target.value;
     layout.view_name = event.target.innerText;
-    layout.setState({view: view});
-    layout.ensureHouseViewData();
+    layout.setState({view: view}, function(){
+      layout.ensureHouseViewData();
+    });
   },
 
   setHouse: function(event){

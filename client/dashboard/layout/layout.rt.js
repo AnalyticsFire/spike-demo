@@ -33,7 +33,7 @@ export default function () {
             'onChange': this.setHouse
         },
         _.map(this.state.houses, repeatHouse2.bind(this))
-    ])) : null, this.state.view === 'energy' && this.state.house ? React.createElement('table', { 'className': 'table' }, React.createElement('thead', {}, React.createElement('tr', {}, React.createElement('th', {}), React.createElement('th', {}, 'Day'), React.createElement('th', {}, 'Consumption (Wh)'), React.createElement('th', {}, 'Production (Wh)'))), React.createElement.apply(this, [
+    ])) : null, this.state.view === 'energy' && this.state.house ? React.createElement('table', { 'className': 'table' }, React.createElement('thead', {}, React.createElement('tr', {}, React.createElement('th', {}), React.createElement('th', {}, 'Day'), React.createElement('th', {}, 'Consumption (kWh)'), React.createElement('th', {}, 'Production (kWh)'))), React.createElement.apply(this, [
         'tbody',
         {},
         _.map(this.state.house.energy_data, repeatEnergy_datum3.bind(this))

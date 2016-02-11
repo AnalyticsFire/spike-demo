@@ -23,7 +23,7 @@ class PowerDatum {
 
   get time_to_s(){
     var power_datum = this;
-    return power_datum.data.time.format('YYYY-MM-DD HH:MM');
+    return power_datum.data.time.format('YYYY-MM-DD HH:mm');
   }
   get consumption_to_s(){
     var power_datum = this;

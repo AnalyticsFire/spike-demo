@@ -21,23 +21,23 @@ export class PowerDataSeed {
       data.time = moment.utc(parseInt(data.time * 1000)).format();
       rows.push(data);
       if (rows.length % 100 === 0){
-        DB.PowerDatum.bulkCreate(rows, {validate: true}).then(()=>{
-          rows = [];
+        DB.PowerDatum.bulkCreate(rows, {validate: true}).catch((error)=>{
+          console.error(JSON.stringify(error));
+          console.error(JSON.stringify(rows));
         });
+        rows = [];
       }
     });
     csvStream.on("end", function(){
       console.log("all rows parsed")
       DB.PowerDatum.bulkCreate(rows, {validate: true}).then(()=>{
         return DB.House.findAll().then((houses)=>{
-          var promise = Promise.resolve();
-
+          var promises = [];
           for (var house of houses){
-            promise = promise.then(()=>{
-              return house.aggregatePowerToEnergyData();
-            });
+            var p = house.aggregatePowerToEnergyData();
+            promises.push(p);
           }
-          return promise;
+          return Promise.all(promises);
         });
       }).then(()=>{
         console.log("DONE!")
@@ -90,7 +90,6 @@ export class HouseSeed {
       rows = [];
 
     csvStream.on("data", function(data){
-      console.log(JSON.stringify(data))
       rows.push(data);
     });
     csvStream.on("end", function(){

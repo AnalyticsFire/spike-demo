@@ -14,7 +14,9 @@ var EnergyDatum = DB.sequelize.define(NAME, {
     primaryKey: true,
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
-  day: DB.Sequelize.DATEONLY,
+  day: {
+    type: DB.Sequelize.DATEONLY,
+  },
   production: DB.Sequelize.FLOAT,
   consumption: DB.Sequelize.FLOAT
 }, {
@@ -22,9 +24,9 @@ var EnergyDatum = DB.sequelize.define(NAME, {
   underscored: true,
   tableName: "energy_data",
   instanceMethods: {
-    exposeToApi: ()=>{
+    exposeToApi: function(){
       var energy_datum = this,
-        values = this.dataValues;
+        values = energy_datum.dataValues;
       values.energy_datum = energy_datum.day.getTime() / 1000;
       return values;
     }
