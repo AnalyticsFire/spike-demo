@@ -12,6 +12,10 @@ export default class {
   // returns array of array length two, representing mins and maxes not within min_max2.
   static minusRange(min_max1, min_max2){
     var minus = [];
+
+    // return undefined if min_max1 not provided
+    if (!min_max1 || (!min_max1[0] && !min_max2[1])) return undefined;
+
     if (min_max1[0] >= min_max2[0]){
       if (min_max1[1] > min_max2[1]) minus.push([min_max2[1], min_max1[1]]);
     } else if (min_max1[1] <= min_max2[1]){

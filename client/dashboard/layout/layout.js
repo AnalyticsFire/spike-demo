@@ -61,7 +61,6 @@ var Layout = React.createClass({
         request = house.ensureEnergyData();
       }
       request.then(()=>{
-        console.log('data retrieved')
         layout.setState({requesting_data: false}, ()=>{
           console.log(layout.state.requesting_data);
         });
