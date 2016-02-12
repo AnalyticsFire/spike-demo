@@ -29,7 +29,7 @@ class BarChart {
 
   constructor(options){
     var bar_chart = this;
-    bar_chart =  extend(bar_chart, DEFAULTS, options);
+    bar_chart =  extend(bar_chart, DEFAULTS, bar_chart.chart_options, options);
 
     bar_chart.height = bar_chart.outer_height - bar_chart.margin.top - bar_chart.margin.bottom;
     bar_chart.width = bar_chart.outer_width - bar_chart.margin.left - bar_chart.margin.right;

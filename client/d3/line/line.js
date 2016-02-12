@@ -38,6 +38,12 @@ class LineChart {
     line_chart.init();
   }
 
+  get chart_options(){
+    return {
+      interpolation: 'basis'
+    };
+  }
+
   init(){
     var line_chart = this;
 
@@ -49,7 +55,7 @@ class LineChart {
 
     // function that draws the lines.
     line_chart.line = d3.svg.line()
-      .interpolate("basis")
+      .interpolate(line_chart.chart_options.interpolation)
       .x(function(d){ return x(d[line_chart.domain_attr]); })
       .y(function(d){ return y(d[line_chart.range_attr]); });
 
