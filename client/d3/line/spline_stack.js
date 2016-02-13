@@ -2,7 +2,6 @@ import LineChart from './line';
 
 const INTERPOLATION = 'cardinal';
 
-
 // inspired by https://bl.ocks.org/mbostock/3885211
 class SplineStackChart extends LineChart {
 
@@ -28,14 +27,19 @@ class SplineStackChart extends LineChart {
         spline_stack.defineAxes();
   }
 
+  get chart_options(){
+    return {
+      interpolation: INTERPOLATION
+    };
+  }
+
   serializeData(data){
     var spline_stack = this,
       serialized_data = {
         range_min: -Infinity,
         range_max: Infinity,
         domain_min: -Infinity,
-        domain_max: Infinity
-      };
+        domain_max: Infinity };
 
     data.series.forEach(function(series, i){
       series.css_class = series.css_class || spline_stack.toClass ? spline_stack.toClass(series) : "";

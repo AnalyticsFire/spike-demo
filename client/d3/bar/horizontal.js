@@ -42,7 +42,7 @@ class HorizontalBarChart extends BarChart {
                 bbox = elem.getBBox(),
                 middleX = bbox.x + (bbox.width / 2),
                 middleY = bbox.y + (bbox.height / 2);
-            return "rotate(-30,"+middleX + "," + middleY+")"
+            return "rotate(-30,"+middleX + "," + middleY+")";
           });
 
     bar_chart.x_scale.domain([0, data.max]);
@@ -68,7 +68,7 @@ class HorizontalBarChart extends BarChart {
           .attr("height", bar_chart.y_scale.rangeBand())
           .attr("x", function(d) { return bar_chart.x_scale(d.cummulative); })
           .attr("width", function(d) { return bar_chart.x_scale(d.value); })
-          .attr("opacity", function(d) { return d.opacity;  })
+          .attr("opacity", function(d) { return d.opacity;  });
   }
 
 }

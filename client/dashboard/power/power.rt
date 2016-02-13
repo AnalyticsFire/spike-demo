@@ -1,0 +1,21 @@
+<div id="power_view">
+  <h2>Fifteen Minute Power Interval</h2>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Time</th>
+        <th>Consumption (W)</th>
+        <th>Production (W)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr rt-repeat="power_datum in this.state.house.power_data" key="{power_datum.react_key}">
+        <td></td>
+        <td>{power_datum.time_to_s}</td>
+        <td>{power_datum.consumption_to_s}</td>
+        <td>{power_datum.production_to_s}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

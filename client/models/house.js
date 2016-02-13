@@ -84,6 +84,7 @@ class House {
     if (date_range.length === 0) return house.getEnergyData({dates: [[opts.start_date, opts.end_date]]})
 
     query_ranges = MathUtil.minusRange([opts.start_date, opts.end_date], [min_date, max_date]);
+
     if (!query_ranges) return Promise.resolve(house.power_data);
 
     cache = ArrayUtil.selectMap(date_range, (datum_day)=>{

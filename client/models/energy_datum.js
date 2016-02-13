@@ -38,7 +38,7 @@ class EnergyDatum {
 
   update(data){
     var energy_datum = this,
-      house = power_datum.house;
+      house = energy_datum.house;
     if (data.day) data.day = moment.tz(data.day, house.data.timezone);
     extend(energy_datum.data, data);
   }
