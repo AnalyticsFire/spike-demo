@@ -10,7 +10,7 @@ var Layout = React.createClass({
       houses: null,
       house: null,
       view: 'graph',
-      dataset: 'energy',
+      dataset: 'power',
       requesting_data: true
     };
   },

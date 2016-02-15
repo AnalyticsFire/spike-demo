@@ -3,7 +3,7 @@ import extend from 'extend';
 const DEFAULTS = {
   outer_width: 500,
   outer_height: 300,
-  margin: {top: 0, left: 70, bottom: 50, right: 20},
+  margin: {top: 30, left: 70, bottom: 50, right: 20},
   domain_ticks: 10,
   range_ticks: 8,
   container: "container",
@@ -12,7 +12,7 @@ const DEFAULTS = {
   domain_attr: undefined,
   range_attr: undefined,
   titleize: function(series, datum){
-    var s = datum ? datum.name : series.title;
+    var s = datum ? datum.title : series.title;
     if (!s) return '';
     var words = s.split(' '),
       array = [];

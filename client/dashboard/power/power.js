@@ -36,10 +36,11 @@ var Power = React.createClass({
         if (power.props.view === 'graph') power.initGraph();
       });
     }
+    if (new_props.view !== 'graph' && power.props.view === 'graph') power.destroyGraph();
   },
 
   componentDidUpdate: function(prev_props, _prev_state){
-    var power_datum = this,
+    var power = this,
       house = power.props.house;
     if (prev_props.view !== 'graph' && power.props.view === 'graph') power.initGraph();
   },
@@ -47,23 +48,20 @@ var Power = React.createClass({
   initGraph: function(){
     var power = this;
     if (power.graph === undefined){
-      document.getElementById('power_graph').innerHTML = '';
       power.graph = new SplineStackChart({
         container: '#power_graph',
         outer_width: 800,
         outer_height: 200,
-        date_attr: 'day',
         color: '#0404B4',
-        toDate: (power_datum)=>{ return power_datum.data.day.toDate(); }
+        range_attr: 'y',
+        domain_attr: 'x',
+        time_series: true
       });
       jQuery('#power_graph').tooltip({
-        selector: '.d3-chart-grid-unit',
+        selector: 'path',
         container: 'body',
         title: function(){
-          var power_datum = this.__data__,
-            date_s = d3.time.format('%a %b %d, %Y')(power_datum.data.day.toDate()),
-            range_value = `${Math.round(power_datum.data[power.state.graph_attr])} kWh`;
-          return `${date_s}: ${range_value}`;
+          return this.__data__.title;
         }
       });
     }
@@ -72,15 +70,26 @@ var Power = React.createClass({
 
   updateGraph: function(){
     var power = this,
-      house = power.props.house;
-    power.graph.rangeValue = (datum)=>{ return datum.data[power.state.graph_attr]; }
+      house = power.props.house,
+      net_power = {
+        title: 'Net Power Consumption',
+        values: house.power_data.slice(0, 200).map((power_datum)=>{ return {y: Math.max(0, power_datum.data.consumption - power_datum.data.production), x: power_datum.data.time.toDate() } })
+      },
+      savings = {
+        title: 'Power Production',
+        values: house.power_data.slice(0, 200).map((power_datum)=>{ return {y: power_datum.data.production, x: power_datum.data.time.toDate() } })
+      };
     power.graph.drawData({
       title: power.graph_title,
       css_class: '',
-      min_range: 0,
-      max_range: 150,
-      values: house.power_data
+      series: [net_power, savings]
     });
+  },
+
+  destroyGraph: function(){
+    var power = this;
+    document.getElementById('power_graph').innerHTML = '';
+    power.graph = undefined;
   },
 
   render: function() {

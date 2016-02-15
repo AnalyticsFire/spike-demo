@@ -1,68 +1,15 @@
 import extend from 'extend';
 
-const DEFAULTS = {
-  outer_width: 500,
-  outer_height: 300,
-  margin: {top: 0, left: 70, bottom: 50, right: 20},
-  domain_ticks: 10,
-  range_ticks: 8,
-  container: "container",
-  time_series: true,
-  range_label: "range",
-  domain_attr: null,
-  range_attr: 'y',
-  titleize: function(series, datum){
-    var s = datum ? datum.name : series.name,
-      words = s.split(' '),
-      array = [];
-    for (var i=0; i<words.length; ++i) {
-      array.push(words[i].charAt(0).toUpperCase() + words[i].toLowerCase().slice(1));
-    }
-    return array.join(' ');
-  },
-  toClass: function(series){
-    return series ? series.title.toLowerCase().replace(/\s+/g, '-') : "";
-  }
-}
+import Chart from './../base';
+
 
 // inspired by https://gist.github.com/mbostock/4b66c0d9be9a0d56484e
-class LineChart {
-
-  constructor(options){
-    var line_chart = this;
-    line_chart =  extend(line_chart, DEFAULTS, options);
-
-    line_chart.height = line_chart.outer_height - line_chart.margin.top - line_chart.margin.bottom;
-    line_chart.width = line_chart.outer_width - line_chart.margin.left - line_chart.margin.right;
-
-    line_chart.init();
-  }
+class LineChart extends Chart {
 
   get chart_options(){
     return {
       interpolation: 'basis'
     };
-  }
-
-  init(){
-    var line_chart = this;
-
-    line_chart.svg = d3.select(line_chart.container).append("svg")
-        .attr("width", line_chart.outer_width)
-        .attr("height", line_chart.outer_height)
-      .append("g")
-        .attr("transform", "translate(" + line_chart.margin.left + "," + line_chart.margin.top + ")");
-
-    // function that draws the lines.
-    line_chart.line = d3.svg.line()
-      .interpolate(line_chart.chart_options.interpolation)
-      .x(function(d){ return x(d[line_chart.domain_attr]); })
-      .y(function(d){ return y(d[line_chart.range_attr]); });
-
-    // function that returns unique color based on series_title.
-    line_chart.color = d3.scale.category20();
-
-    line_chart.defineAxes();
   }
 
   defineAxes(){
@@ -72,7 +19,8 @@ class LineChart {
       .range([line_chart.height, 0]);
     line_chart.y_axis = d3.svg.axis()
       .scale(line_chart.y_scale)
-      .orient("left");
+      .orient("left")
+      .outerTickSize(1);
 
     if (line_chart.time_series){
       line_chart.x_scale = d3.time.scale()
@@ -84,24 +32,39 @@ class LineChart {
 
     line_chart.x_axis = d3.svg.axis()
       .scale(line_chart.x_scale)
-      .orient("bottom");
+      .orient("bottom")
+      .outerTickSize(0)
+    //line_chart.x_axis.tickFormat(d3.time.format('%b %d at %H'))
+    //line_chart.x_axis.ticks(d3.time.hour, 12);
 
     // append axes
     line_chart.svg.append("g")
-        .attr("class", "d3-chart-range d3-chart-axis")
-        .attr("transform", "translate(0, " + (line_chart.height - line_chart.margin.top) + ")");
+        .attr("class", "d3-chart-range d3-chart-axis");
     line_chart.svg.append("g")
-        .attr("class", "d3-chart-domain d3-chart-axis");
+        .attr("class", "d3-chart-domain d3-chart-axis")
+        .attr("transform", "translate(0, " + (line_chart.height) + ")");
+  }
+
+  afterAxes(){
+    var line_chart = this;
+    // function that draws the lines.
+    line_chart.line = d3.svg.line()
+      .interpolate(line_chart.chart_options.interpolation)
+      .x(function(d){ return line_chart.x_scale(d[line_chart.domain_attr]); })
+      .y(function(d){ return line_chart.y_scale(d[line_chart.range_attr]); });
+
+    // function that returns unique color based on series_title.
+    line_chart.color = d3.scale.category20();
   }
 
   serializeData(data){
     var line_chart = this,
       serialized_data = {
         series: [],
-        range_min: -Infinity,
-        range_max: Infinity,
-        domain_min: -Infinity,
-        domain_max: Infinity,
+        range_min: Infinity,
+        range_max: -Infinity,
+        domain_min: Infinity,
+        domain_max: -Infinity,
       };
 
     data.forEach(function(data_set){
@@ -131,7 +94,7 @@ class LineChart {
     bar_chart.svg.select(".d3-chart-range.d3-chart-axis")
       .call(bar_chart.y_axis);
 
-    bar_chart.x_scale.domain([Math.min(data.domain_min), data.domain_max]);
+    bar_chart.x_scale.domain([data.domain_max, Math.min(data.domain_min)]);
     bar_chart.svg.select(".d3-chart-domain.d3-chart-axis").call(bar_chart.x_axis);
 
     // draw lines
