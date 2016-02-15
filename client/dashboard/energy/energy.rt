@@ -1,33 +1,23 @@
 <div id="energy_view">
-  <h2>Household Daily Energy</h2>
   <div class="alert alert-warning" rt-if="this.state.loading_data">
     Retrieving energy data for the {this.props.house.name} household...
   </div>
-  <div class="btn-group" role="group">
-    <button
-      data-value="graph"
-      rt-class="{active: this.state.view === 'graph'}"
-      onClick="{this.setView}"
-      type="button" class="btn btn-primary">Graph</button>
-    <button
-      data-value="table"
-      rt-class="{active: this.state.view === 'table'}"
-      onClick="{this.setView}"
-      type="button" class="btn btn-primary">Table</button>
-  </div><br/>
-  <div rt-if="this.state.view === 'graph'" class="btn-group" role="group">
-    <button
-      data-value="consumption"
-      rt-class="{active: this.state.graph_attr === 'consumption'}"
-      onClick="{this.setGraphAttr}"
-      type="button" class="btn btn-primary">Consumption</button>
-    <button
-      data-value="production"
-      rt-class="{active: this.state.graph_attr === 'production'}"
-      onClick="{this.setGraphAttr}"
-      type="button" class="btn btn-primary">Production</button>
+  <div rt-if="this.props.view === 'graph'">
+    <h4>Select Data</h4>
+    <div class="btn-group" role="group">
+      <button
+        data-value="consumption"
+        rt-class="{active: this.state.graph_attr === 'consumption'}"
+        onClick="{this.setGraphAttr}"
+        type="button" class="btn btn-primary">Consumption</button>
+      <button
+        data-value="production"
+        rt-class="{active: this.state.graph_attr === 'production'}"
+        onClick="{this.setGraphAttr}"
+        type="button" class="btn btn-primary">Production</button>
+    </div>
   </div>
-  <table class="table" rt-if="this.state.view === 'table'">
+  <table class="table" rt-if="this.props.view === 'table'">
     <thead>
       <tr>
         <th></th>
@@ -45,5 +35,5 @@
       </tr>
     </tbody>
   </table>
-  <div id="energy_graph"></div>
+  <div rt-if="this.props.view === 'graph'" id="energy_graph"></div>
 </div>

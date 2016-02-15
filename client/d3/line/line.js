@@ -10,7 +10,7 @@ const DEFAULTS = {
   time_series: true,
   range_label: "range",
   domain_attr: null,
-  range_attr:
+  range_attr: 'y',
   titleize: function(series, datum){
     var s = datum ? datum.name : series.name,
       words = s.split(' '),
@@ -75,8 +75,8 @@ class LineChart {
       .orient("left");
 
     if (line_chart.time_series){
-      line_chart.x_scale = d3.time.scale(),
-        .range([0, line_chart.width]););
+      line_chart.x_scale = d3.time.scale()
+        .range([0, line_chart.width]);
     } else {
       line_chart.x_scale = d3.scale.linear()
         .range([0, line_chart.width]);
@@ -147,7 +147,7 @@ class LineChart {
   applyData(groups){
     var line_chart = this;
     groups
-      .attr('class', function(series){ return "d3-chart-line " + series.css_class; )
+      .attr('class', function(series){ return "d3-chart-line " + series.css_class; })
       .attr("title", function(series){ return series.title; })
       .append("path")
         .attr("d", function(series){ return line_chart.line(series.values); })

@@ -8,7 +8,6 @@ var Energy = React.createClass({
   getInitialState: function(){
     var energy = this;
     return {
-      view: 'graph',
       graph_attr: 'production',
       loading_data: true
     };
@@ -25,29 +24,26 @@ var Energy = React.createClass({
     energy.graph_title = 'Daily Consumption';
     house.ensureEnergyData().then(()=>{
       energy.setState({loading_data: false});
-      energy.initGraph();
+      if (energy.props.view === 'graph') energy.initGraph();
     });
   },
 
   componentWillReceiveProps: function(new_props){
     var energy = this;
-    energy.setState({loading_data: true});
     if (new_props.house !== energy.state.house){
+      energy.setState({loading_data: true});
       new_props.house.ensureEnergyData().then(()=>{
         energy.setState({loading_data: false});
-        if (energy.state.view === 'graph') energy.initGraph();
+        if (energy.props.view === 'graph') energy.initGraph();
       });
     }
+    if (new_props.view !== 'graph' && energy.props.view === 'graph') energy.destroyGraph();
   },
 
-  setView: function(event){
+  componentDidUpdate: function(prev_props, _prev_state){
     var energy = this,
-      view = event.target.dataset.value,
       house = energy.props.house;
-    if (view !== energy.state.view){
-      energy.setState({view: view});
-      if (energy.state.view === 'graph') energy.initGraph();
-    }
+    if (prev_props.view !== 'graph' && energy.props.view === 'graph') energy.initGraph();
   },
 
   setGraphAttr: function(event){
@@ -58,7 +54,7 @@ var Energy = React.createClass({
       energy.setState({
         graph_attr: graph_attr
       }, function(){
-        if (energy.state.view === 'graph') energy.updateGraph();
+        if (energy.props.view === 'graph') energy.updateGraph();
       })
     }
   },
@@ -66,7 +62,6 @@ var Energy = React.createClass({
   initGraph: function(){
     var energy = this;
     if (energy.graph === undefined){
-      document.getElementById('energy_graph').innerHTML = '';
       energy.graph = new CalendarGridChart({
         container: '#energy_graph',
         outer_width: 800,
@@ -100,6 +95,12 @@ var Energy = React.createClass({
       max_range: 150,
       values: house.energy_data
     });
+  },
+
+  destroyGraph: function(){
+    var energy = this;
+    document.getElementById('energy_graph').innerHTML = '';
+    energy.graph = undefined;
   },
 
   render: function() {

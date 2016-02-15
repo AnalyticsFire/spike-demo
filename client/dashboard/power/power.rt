@@ -1,5 +1,8 @@
 <div id="power_view">
-  <h2>Fifteen Minute Power Interval</h2>
+  <h2>Household 15-minute Power Statistics</h2>
+  <div class="alert alert-warning" rt-if="this.state.loading_data">
+    Retrieving power data for the {this.props.house.name} household...
+  </div>
   <table>
     <thead>
       <tr>
@@ -18,4 +21,5 @@
       </tr>
     </tbody>
   </table>
+  <div id="power_data"></div>
 </div>

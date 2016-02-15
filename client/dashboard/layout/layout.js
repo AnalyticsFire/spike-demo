@@ -2,18 +2,15 @@ import React from 'react';
 import layoutRt from './layout.rt.js';
 import House from './../../models/house';
 
-const VIEWS = [['power', 'Power Savings'], ['energy', 'Energy Production']];
-
 var Layout = React.createClass({
 
   getInitialState: function(){
     var layout = this;
-    layout.view_name = VIEWS[0][1];
     return {
-      views: VIEWS,
       houses: null,
       house: null,
-      view: 'energy',
+      view: 'graph',
+      dataset: 'energy',
       requesting_data: true
     };
   },
@@ -30,18 +27,24 @@ var Layout = React.createClass({
     });
   },
 
-  setView: function(event){
-    var layout = this,
-      view = event.target.value;
-    layout.view_name = event.target.innerText;
-    layout.setState({view: view});
-  },
-
   setHouse: function(event){
     var layout = this,
       house_id = event.target.value,
       house = layout.state.houses.find((house)=>{ return house.data.id == house_id });
     layout.setState({house: house});
+  },
+
+  setView: function(event){
+    var layout = this,
+      view = event.target.dataset.value;
+    layout.view_name = event.target.innerText;
+    layout.setState({view: view});
+  },
+
+  setDataset: function(event){
+    var layout = this,
+      dataset = event.target.dataset.value;
+    layout.setState({dataset: dataset});
   },
 
   render: function() {

@@ -3,15 +3,40 @@
 <div id="layout">
   <div class="alert alert-warning" rt-if="this.state.requesting_data">Retrieving houses...</div>
   <h1 rt-if="this.state.house">{this.state.house.name}</h1>
-  <h3 rt-if="this.state.view">{this.view_name}</h3>
 
-  <select class="form-control" onChange="{this.setView}">
-    <option rt-repeat="view in this.state.views" value="{view[0]}" key="view-{view[0]}">{view[1]}</option>
-  </select>
+  <h4>Select household:</h4>
   <select rt-if="this.state.houses" class="form-control" onChange="{this.setHouse}">
     <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.react_key}">{house.data.name}</option>
   </select>
 
-  <Energy rt-if="this.state.house && this.state.view === 'energy'" house="{this.state.house}"></Energy>
-  <Power rt-if="this.state.house && this.state.view === 'power'" house="{this.state.house}"></Power>
+  <h4>Select dataset:</h4>
+  <div class="btn-group" role="group">
+    <button
+      data-value="energy"
+      rt-class="{active: this.state.dataset === 'energy'}"
+      onClick="{this.setDataset}"
+      type="button" class="btn btn-primary">Daily Energy Statistics</button>
+    <button
+      data-value="power"
+      rt-class="{active: this.state.dataset === 'power'}"
+      onClick="{this.setDataset}"
+      type="button" class="btn btn-primary">15-minute Power Statistics</button>
+  </div>
+
+  <h4>View as:</h4>
+  <div class="btn-group" role="group">
+    <button
+      data-value="graph"
+      rt-class="{active: this.state.view === 'graph'}"
+      onClick="{this.setView}"
+      type="button" class="btn btn-primary">Graph</button>
+    <button
+      data-value="table"
+      rt-class="{active: this.state.view === 'table'}"
+      onClick="{this.setView}"
+      type="button" class="btn btn-primary">Table</button>
+  </div>
+
+  <Energy rt-if="this.state.house && this.state.dataset === 'energy'" house="{this.state.house}" view="{this.state.view}"></Energy>
+  <Power rt-if="this.state.house && this.state.dataset === 'power'" house="{this.state.house}" view="{this.state.view}"></Power>
 </div>
