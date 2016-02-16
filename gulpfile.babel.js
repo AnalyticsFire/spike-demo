@@ -41,7 +41,7 @@ gulp.task('build', function(done) {
   } else if (yargs.argv.design){
     env = 'design';
   } else {
-    throw new gutil.PluginError("webpack", "Must add '--production' or '--design' option.");
+    throw new gutil.PluginError("webpack", "Must include '--production' or '--design' option.");
   }
   config = require(`${__dirname}/server/config/webpack/${env}`);
   // run webpack

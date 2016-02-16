@@ -11,16 +11,6 @@ const DEFAULTS = {
   range_label: undefined,
   domain_attr: undefined,
   range_attr: undefined,
-  titleize: function(series, datum){
-    var s = datum ? datum.title : series.title;
-    if (!s) return '';
-    var words = s.split(' '),
-      array = [];
-    for (var i=0; i<words.length; ++i) {
-      array.push(words[i].charAt(0).toUpperCase() + words[i].toLowerCase().slice(1));
-    }
-    return array.join(' ');
-  },
   toCssClass: function(series){
     return series ? series.title.toLowerCase().replace(/\s+/g, '-') : "";
   }
@@ -45,39 +35,6 @@ class Chart {
     if (chart.afterAxes) chart.afterAxes();
   }
 
-  defineAxes(){
-    var chart = this;
-
-    chart.y_scale = d3.scale.linear()
-      .range([chart.height, 0]);
-    chart.y_axis = d3.svg.axis()
-      .scale(chart.y_scale)
-      .orient("left")
-      .outerTickSize(1);
-
-    if (chart.time_series){
-      chart.x_scale = d3.time.scale()
-        .range([0, chart.width]);
-    } else {
-      chart.x_scale = d3.scale.linear()
-        .range([0, chart.width]);
-    }
-
-    chart.x_axis = d3.svg.axis()
-      .scale(chart.x_scale)
-      .orient("bottom")
-      .outerTickSize(0)
-    //chart.x_axis.tickFormat(d3.time.format('%b %d at %H'))
-    //chart.x_axis.ticks(d3.time.hour, 12);
-
-    // append axes
-    chart.svg.append("g")
-        .attr("class", "d3-chart-range d3-chart-axis");
-    chart.svg.append("g")
-        .attr("class", "d3-chart-domain d3-chart-axis")
-        .attr("transform", "translate(0, " + (chart.height) + ")");
-  }
-
   cssClass(series){
     var chart = this;
     if (!chart.toCssClass) return '';
@@ -99,7 +56,16 @@ class Chart {
         extent.max_range = Math.max(max_range, value[range_attr]);
       });
     });
-    returnextent
+    return extent;
+  }
+
+  titleize(s){
+    var words = s.split(' '),
+      array = [];
+    for (var i=0; i<words.length; ++i) {
+      array.push(words[i].charAt(0).toUpperCase() + words[i].toLowerCase().slice(1));
+    }
+    return array.join(' ');
   }
 
 }
