@@ -13,36 +13,36 @@ class LineChart extends Chart {
   }
 
   defineAxes(){
-    var line_chart = this;
+    var chart = this;
 
-    line_chart.y_scale = d3.scale.linear()
-      .range([line_chart.height, 0]);
-    line_chart.y_axis = d3.svg.axis()
-      .scale(line_chart.y_scale)
+    chart.y_scale = d3.scale.linear()
+      .range([chart.height, 0]);
+    chart.y_axis = d3.svg.axis()
+      .scale(chart.y_scale)
       .orient("left")
       .outerTickSize(1);
 
-    if (line_chart.time_series){
-      line_chart.x_scale = d3.time.scale()
-        .range([0, line_chart.width]);
+    if (chart.time_series){
+      chart.x_scale = d3.time.scale()
+        .range([0, chart.width]);
     } else {
-      line_chart.x_scale = d3.scale.linear()
-        .range([0, line_chart.width]);
+      chart.x_scale = d3.scale.linear()
+        .range([0, chart.width]);
     }
 
-    line_chart.x_axis = d3.svg.axis()
-      .scale(line_chart.x_scale)
+    chart.x_axis = d3.svg.axis()
+      .scale(chart.x_scale)
       .orient("bottom")
       .outerTickSize(0)
-    //line_chart.x_axis.tickFormat(d3.time.format('%b %d at %H'))
-    //line_chart.x_axis.ticks(d3.time.hour, 12);
+    //chart.x_axis.tickFormat(d3.time.format('%b %d at %H'))
+    //chart.x_axis.ticks(d3.time.hour, 12);
 
     // append axes
-    line_chart.svg.append("g")
+    chart.svg.append("g")
         .attr("class", "d3-chart-range d3-chart-axis");
-    line_chart.svg.append("g")
+    chart.svg.append("g")
         .attr("class", "d3-chart-domain d3-chart-axis")
-        .attr("transform", "translate(0, " + (line_chart.height) + ")");
+        .attr("transform", "translate(0, " + (chart.height) + ")");
   }
 
   afterAxes(){

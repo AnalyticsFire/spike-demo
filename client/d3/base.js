@@ -21,7 +21,7 @@ const DEFAULTS = {
     }
     return array.join(' ');
   },
-  toClass: function(series){
+  toCssClass: function(series){
     return series ? series.title.toLowerCase().replace(/\s+/g, '-') : "";
   }
 };
@@ -43,6 +43,63 @@ class Chart {
         .attr("transform", "translate(" + chart.margin.left + "," + chart.margin.top + ")");
     chart.defineAxes();
     if (chart.afterAxes) chart.afterAxes();
+  }
+
+  defineAxes(){
+    var chart = this;
+
+    chart.y_scale = d3.scale.linear()
+      .range([chart.height, 0]);
+    chart.y_axis = d3.svg.axis()
+      .scale(chart.y_scale)
+      .orient("left")
+      .outerTickSize(1);
+
+    if (chart.time_series){
+      chart.x_scale = d3.time.scale()
+        .range([0, chart.width]);
+    } else {
+      chart.x_scale = d3.scale.linear()
+        .range([0, chart.width]);
+    }
+
+    chart.x_axis = d3.svg.axis()
+      .scale(chart.x_scale)
+      .orient("bottom")
+      .outerTickSize(0)
+    //chart.x_axis.tickFormat(d3.time.format('%b %d at %H'))
+    //chart.x_axis.ticks(d3.time.hour, 12);
+
+    // append axes
+    chart.svg.append("g")
+        .attr("class", "d3-chart-range d3-chart-axis");
+    chart.svg.append("g")
+        .attr("class", "d3-chart-domain d3-chart-axis")
+        .attr("transform", "translate(0, " + (chart.height) + ")");
+  }
+
+  cssClass(series){
+    var chart = this;
+    if (!chart.toCssClass) return '';
+    return chart.toCssClass(series);
+  }
+
+  nestedExtent(a, series_values, domain_attr, range_attr){
+    var extent = {
+      min_domain: Infinity,
+      max_domain: -Infinity,
+      min_range: Infinity,
+      max_range: -Infinity
+    };
+    a.forEach((series)=>{
+      series[series_values].forEach((value)=>{
+        extent.min_domain = Math.min(min_domain, value[domain_attr]);
+        extent.max_domain = Math.max(max_domain, value[domain_attr]);
+        extent.min_range = Math.min(min_range, value[range_attr]);
+        extent.max_range = Math.max(max_range, value[range_attr]);
+      });
+    });
+    returnextent
   }
 
 }
