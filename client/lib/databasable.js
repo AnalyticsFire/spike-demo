@@ -1,12 +1,18 @@
+import Loki from 'lokijs';
+import LokiIndexedAdapter from 'loki/loki-indexed-adapter';
+
 const DEFAULTS = {
-  adapter: ''
+  autosave: false
 };
 
 var databasable = {
 
   accessDb: function(db_name, opts){
     var databasable = this;
-    opts = Object.assign(Object.assign({}, DEFAULTS), opts || {});
+    opts = Object.assign(Object.assign({
+      persistenceMethod: 'adapter',
+      persistenceAdapter: new LokiIndexedAdapter(db_name)
+    }, DEFAULTS), opts || {});
     return new Promise((fnResolve, fnReject){
       if (!databasable.db) {
         databasable.db = new Loki(db_name, opts);
@@ -26,9 +32,9 @@ var databasable = {
     }
   },
 
-  collection(collection_name, options){
+  collection: function(collection_name, options){
     var databasable = this;
-    databasable.accessDb()
+    return databasable.accessDb()
       .then((db)=>{
         var collection = db.getCollection(collection_name)
         if (!collection){
@@ -36,6 +42,22 @@ var databasable = {
         }
         return collection;
       });
+  }
+
+  rangeToLokiParams: function(attr, range){
+    var date_params = {};
+    if (range[0] !== undefined && range[0] !== undefined){
+      var start_condition = {},
+        end_condition = {};
+      date_params['$and'] = [start_condition, end_condition];
+      start_condition[attr] = {'$lt': range[1]};
+      end_condition[attr] = {'$lt': range[1]};
+    } else if (range[0] !== undefined) {
+      date_params[attr] = {'$gt': range[0]}
+    } else if (range[1] !== undefined) {
+      date_params[attr] = {'$lt': range[1]}
+    }
+    return date_params;
   }
 
 };

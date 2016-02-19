@@ -6,8 +6,10 @@ import EnergyDatum from './energy_datum';
 import PowerDataApi from './../api/power_data';
 import EnergyDataApi from './../api/energy_data';
 import HousesApi from './../api/houses';
-import ArrayUtil from './../../shared/utils/array'
-import MathUtil from './../../shared/utils/math'
+import ArrayUtil from './../../shared/utils/array';
+import MathUtil from './../../shared/utils/math';
+import DateRange from './../../shared/utils/date_range';
+import Databasable from './../lib/databasable';
 
 class House {
 
@@ -27,6 +29,18 @@ class House {
     return House.collection()
       .then((house_collection)=>{
         return house_collection.update(house.data);
+      });
+  }
+
+  setPowerData(opts){
+    var house = this;
+    return house.ensurePowerData(opts)
+      .then(()=>{
+        return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS)
+          .then((power_collection)=>{
+            var params = house.rangeToLokiParams('time', [opts.start_date, opts.end_date]);
+            house.power_data = power_collection.find(params).map((data)=>{ return new PowerDatum(data); })
+          });
       })
   }
 
@@ -36,29 +50,40 @@ class House {
       end_date: undefined
     }, opts || {});
     var house = this,
-      query_ranges = DateUtil.dateOverlaps([opts.start_date, opts.end_date], house.data.query_dates]);
+      query_ranges = DateRange.addRange([opts.start_date, opts.end_date], house.data.power_datum_ranges);
 
-
-
-    house.collection(PowerDatum.name, {})
-      .then((power_collection)=>{
-
-      })
+    if (query_ranges.gaps_filled.length > 0){
+      house.getPowerData({dates: query_ranges.gaps_filled})
+        .then(()=>{
+          house.data.power_datum_ranges = query_ranges.new_ranges;
+          return house.save();
+        });
+    } else { return Promise.resolve(); }
   }
 
   getPowerData(params){
     var house = this;
     params.house_id = house.data.id;
-    return PowerDataApi.index(params).then((power_data)=>{
-      return power_data.map((power_datum_data)=>{
-        // save new power data into db
-        // update mins and maxes.
-        var power_datum = PowerDatum.updateOrInitialize(power_datum_data, house);
-        house.power_data_collection.set(power_datum.data.time, power_datum);
-        house.power_data.push(power_datum);
-        return power_datum;
-      });
-    });
+    return PowerDataApi.index(params)
+      .then((power_data)=>{
+        return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS);
+                .then((power_collection)=>{
+                  power_collection.insert(power_data);
+                  return house.db.save();
+                });
+      })
+  }
+
+  setEnergyData(opts){
+    var house = this;
+    return house.ensureEnergyData(opts)
+      .then(()=>{
+        return house.collection(EnergyDatum.NAME, EnergyDatum.COLLECTION_OPTIONS)
+          .then((energy_collection)=>{
+            var params = house.rangeToLokiParams('day', [opts.start_date, opts.end_date]);
+            house.energy_data = energy_collection.find(params).map((data)=>{ return new EnergyDatum(data); })
+          });
+      })
   }
 
   ensureEnergyData(opts){
@@ -67,84 +92,28 @@ class House {
       end_date: undefined
     }, opts || {});
     var house = this,
-      date_range = Array.from(house.energy_data_store.keys()),
-      min_date = Math.min(date_range),
-      max_date = Math.max(date_range),
-      query_ranges, cache;
+      query_ranges = DateRange.addRange([opts.start_date, opts.end_date], house.data.energy_datum_ranges);
 
-    if (date_range.length === 0) return house.getEnergyData({dates: [[opts.start_date, opts.end_date]]})
-
-    query_ranges = MathUtil.minusRange([opts.start_date, opts.end_date], [min_date, max_date]);
-
-    if (!query_ranges) return Promise.resolve(house.power_data);
-
-    cache = ArrayUtil.selectMap(date_range, (datum_day)=>{
-      return ArrayUtil.all(query_ranges, (query_range)=>{
-        return !MathUtil.inRange(datum_day, query_range);
-      });
-    }, (datum_day)=>{
-      return house.energy_data_store.get(datum_day);
-    });
-
-    if (query_ranges.length > 0){
-      return house.getEnergyData({dates: query_ranges}).then((new_energy_data)=>{
-        return new_energy_data_store.concat(cache);
-      });
-    } else return Promise.resolve(cache);
+    if (query_ranges.gaps_filled.length > 0){
+      house.getEnergyData({dates: query_ranges.gaps_filled})
+        .then(()=>{
+          house.data.energy_datum_ranges = query_ranges.new_ranges;
+          return house.save();
+        });
+    } else { return Promise.resolve(); }
   }
 
   getEnergyData(params){
     var house = this;
     params.house_id = house.data.id;
-    return EnergyDataApi.index(params).then((energy_data)=>{
-      return energy_data.map((energy_datum_data)=>{
-        var energy_datum = EnergyDatum.updateOrInitialize(energy_datum_data, house);
-        house.energy_data_store.set(energy_datum.day, energy_datum);
-        house.energy_data.push(energy_datum);
-        return energy_datum;
-      });
-    });
-  }
-
-  update(data){
-    var house = this;
-    extend(house.data, data);
-  }
-
-  static updateOrInitialize(id, data){
-    var house = PowerDatum.store.get(id);
-    if (house) house.update(data);
-    return house || new House(data, data)
-  }
-
-  static accessDb(){
-    return new Promise((fnResolve, fnReject){
-      if (!House.db) {
-        House.db = new Loki('houses', adapter: '');
-        House.db.loadDatabase({}, ()=>{
-          fnResolve(House.db);
-        });
-      } else { fnResolve(House.db); }
-    });
-  }
-
-  static closeDb(){
-    if (House.db){
-      House.db.save();
-      House.db.close();
-      House.db = undefined;
-    }
-  }
-
-  static collection(){
-    return House.accessDb()
-      .then((db)=>{
-        var house_collection = db.getCollection('houses')
-        if (!house_collection){
-          house_collection = db.addCollection('houses', {indices: ['id']});
-        }
-        return house_collection;
-      });
+    return EnergyDataApi.index(params)
+      .then((energy_data)=>{
+        return house.collection(EnergyDatum.NAME, EnergyDatum.COLLECTION_OPTIONS);
+                .then((energy_collection)=>{
+                  energy_collection.insert(energy_data);
+                  return house.db.save();
+                });
+      })
   }
 
   static ensureHouses(ids){
@@ -178,4 +147,5 @@ class House {
 
 }
 
+Object.assign(House, Databasable);
 export default House;

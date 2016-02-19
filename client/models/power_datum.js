@@ -1,6 +1,11 @@
 import extend from 'extend';
 import moment from 'moment-timezone';
 
+const NAME = 'PowerDatum';
+const COLLECTION_DEFAULTS = {
+  indices: ['time']
+};
+
 class PowerDatum {
   constructor(data, house){
     var power_datum = this;
@@ -34,21 +39,9 @@ class PowerDatum {
     return Math.round(power_datum.data.production);
   }
 
-  update(data){
-    var power_datum = this,
-      house = power_datum.house;
-    if (data.time) data.time = moment.tz(data.time, house.data.timezone);
-    extend(power_datum.data, data);
-  }
-
-  static updateOrInitialize(data, house){
-    var power_datum = PowerDatum.store.get(data.id);
-    if (power_datum) power_datum.update(data);
-    return power_datum || new PowerDatum(data, house)
-  }
-
 }
 
-PowerDatum.store = new Map();
+PowerDatum.NAME = NAME;
+PowerDatum.COLLECTION_DEFAULTS = COLLECTION_DEFAULTS;
 
 export default PowerDatum;

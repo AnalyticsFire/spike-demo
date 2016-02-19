@@ -1,4 +1,4 @@
-class DateUtil {
+class DateRange {
 
   static addRange(new_range, ranges){
     var gaps_filled = [], new_ranges = [],
@@ -47,14 +47,6 @@ class DateUtil {
     }
 
     return { gaps_filled: gaps_filled, new_ranges: new_ranges }
-  }
-
-  static min(date1, date2){
-
-  }
-
-  static max(date1, date2){
-
   }
 
   static gte(date1, date2){
