@@ -11,20 +11,23 @@ import MathUtil from './../../shared/utils/math'
 
 class House {
 
+  // must be initiated with a dataset already in Loki database (not directly JSON).
   constructor(data){
     var house = this;
-    House.store.set(data.id, house);
     house.data = data;
-    house.energy_data = [];
-    house.power_data = [];
-    house.energy_data_store = new Map();
-    house.power_data_store = new Map();
-
-    house.initDatabase();
+    Object.assign(house, Databasable);
   }
 
-  get react_key(){
+  get scoped_id(){
     return `house-${this.data.id}`;
+  }
+
+  save(){
+    var house = this;
+    return House.collection()
+      .then((house_collection)=>{
+        return house_collection.update(house.data);
+      })
   }
 
   ensurePowerData(opts){
@@ -32,14 +35,15 @@ class House {
       start_date: undefined,
       end_date: undefined
     }, opts || {});
-    var house = this;
+    var house = this,
+      query_ranges = DateUtil.dateOverlaps([opts.start_date, opts.end_date], house.data.query_dates]);
 
-    // check mins and maxes.
-    house.initCollection(PowerDatum.NAME).then(()=>{
-      house.power_datum_collection.
-    });
 
-    return Promise.resolve(cache);
+
+    house.collection(PowerDatum.name, {})
+      .then((power_collection)=>{
+
+      })
   }
 
   getPowerData(params){
@@ -115,20 +119,20 @@ class House {
 
   static accessDb(){
     return new Promise((fnResolve, fnReject){
-      if (!this.db) {
-        this.db = new Loki('houses', adapter: '');
-        this.db.loadDatabase({}, ()=>{
-          fnResolve(this.db);
+      if (!House.db) {
+        House.db = new Loki('houses', adapter: '');
+        House.db.loadDatabase({}, ()=>{
+          fnResolve(House.db);
         });
-      } else { fnResolve(this.db); }
+      } else { fnResolve(House.db); }
     });
   }
 
   static closeDb(){
-    if (this.db){
-      this.db.save();
-      this.db.close();
-      this.db = undefined;
+    if (House.db){
+      House.db.save();
+      House.db.close();
+      House.db = undefined;
     }
   }
 
@@ -173,7 +177,5 @@ class House {
   }
 
 }
-
-House.store = new Map();
 
 export default House;

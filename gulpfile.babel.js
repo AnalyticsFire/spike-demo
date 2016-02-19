@@ -40,6 +40,8 @@ gulp.task('build', function(done) {
     env = 'production';
   } else if (yargs.argv.design){
     env = 'design';
+  } else if (yargs.argv.test){
+    env = 'test';
   } else {
     throw new gutil.PluginError("webpack", "Must include '--production' or '--design' option.");
   }
@@ -52,5 +54,15 @@ gulp.task('build', function(done) {
     }));
     done();
   });
+});
 
+gulp.task('test', function(done) {
+  var Jasmine = require('jasmine');
+  var jasmine = new Jasmine();
+
+  jasmine.loadConfigFile('test/jasmine.json');
+  jasmine.configureDefaultReporter({
+      showColors: true
+  });
+  jasmine.execute();
 });
