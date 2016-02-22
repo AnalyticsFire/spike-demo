@@ -15,7 +15,7 @@ var EnergyDatum = DB.sequelize.define(NAME, {
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
   day: {
-    type: DB.Sequelize.DATEONLY,
+    type: DB.Sequelize.INTEGER,
   },
   production: DB.Sequelize.FLOAT,
   consumption: DB.Sequelize.FLOAT
@@ -23,14 +23,7 @@ var EnergyDatum = DB.sequelize.define(NAME, {
   paranoid: true,
   underscored: true,
   tableName: "energy_data",
-  instanceMethods: {
-    exposeToApi: function(){
-      var energy_datum = this,
-        values = energy_datum.dataValues;
-      values.energy_datum = energy_datum.day.getTime() / 1000;
-      return values;
-    }
-  },
+  instanceMethods: {},
   classMethods: {
     set: ()=>{
       EnergyDatum.associate();
@@ -46,7 +39,7 @@ var EnergyDatum = DB.sequelize.define(NAME, {
         attributes: ['id', 'production', 'consumption', 'day']
       }).then((energy_data)=>{
         return energy_data.map((energy_datum)=>{
-          return energy_datum.exposeToApi();
+          return energy_datum.dataValues;
         });
       });
     }

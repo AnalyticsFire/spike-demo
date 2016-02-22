@@ -5,7 +5,7 @@ const ENDPOINT = '/data/v1/energy';
 // send all date parameters as unix timestamps;
 class EnergyDataApi {
 
-  static index(params){
+  static index(house, params){
     params = extend({
     }, params);
     if (params.dates){

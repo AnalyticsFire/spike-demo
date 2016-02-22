@@ -30,10 +30,8 @@ class SplineStackChart extends LineChart {
     var spline_stack = this,
       serialized_data = {
         series: [] };
-
     data.series.forEach(function(series, i){
-      series.css_class = series.css_class || spline_stack.toClass ? spline_stack.toClass(series) : "";
-      series.title = series.title || spline_stack.toClass ? spline_stack.titleize(series) : "";
+      series.css_class = series.css_class || spline_stack.toClass ? spline_stack.toClass(series) : "series-" + i;
       if (spline_stack.domain_attr !== 'x' && spline_stack.range_attr !== 'y'){
         series.values = series.values.map((value)=>{
           return {x: value[spline_stack.domain_attr], y: value[spline_stack.range_attr], series: series};
@@ -41,6 +39,7 @@ class SplineStackChart extends LineChart {
       }
       serialized_data.series.push(series);
     });
+
     serialized_data.series = spline_stack.fnStack(serialized_data.series);
     // assume all series have same domain, use first series to establish extent.
     serialized_data.domain_extent = d3.extent(serialized_data.series[0].values.map((value)=>{ return value.x; }));
@@ -68,6 +67,17 @@ class SplineStackChart extends LineChart {
       spline_stack.applyData(paths);
     });
     stack.exit().remove();
+
+    if (spline_stack.include_dots){
+      data.series.forEach((series)=>{
+        var dots = spline_stack.svg.selectAll(".d3-chart-spline-dot." + series.css_class)
+            .data(series.values);
+        [dots.enter().append("circle"), dots.transition()].forEach((circles)=>{
+          spline_stack.applyDots(series, circles);
+        });
+        dots.exit().remove();
+      });
+    }
   }
 
   applyData(paths){
@@ -75,8 +85,24 @@ class SplineStackChart extends LineChart {
     paths
       .attr("class", function(series){"d3-chart-spline-stack " + series.css_class;})
       .attr("d", function(series){ return spline_stack.fnArea(series.values); })
-      .style("fill", function(series){ return spline_stack.fnColor(series.title); });
+      .style("fill", function(series){ return spline_stack.fnColor(series.title); })
+      .attr('opacity', 1);
   }
+
+  applyDots(series, circles){
+    var spline_stack = this;
+    circles
+      .attr('class', 'd3-chart-spline-dot' + series.css_class)
+      .attr("r", 2)
+      .attr("cx", function(d, i){ return spline_stack.x_scale(d.x); })
+      .attr("cy", function(d, i){ return spline_stack.y_scale(d.y + d.y0); })
+      .attr("title", function(d, i){ return spline_stack.titleizeDatum(series, d); })
+      .style("fill", spline_stack.fnColor(series.title))
+      .attr('opacity', 1)
+      .attr('stroke-width', 0)
+      .attr('stroke', '#fff');
+  }
+
 }
 
 export default SplineStackChart;

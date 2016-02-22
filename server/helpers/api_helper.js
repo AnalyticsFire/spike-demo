@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 class ApiHelper {
 
   // assume all dates from api coming as UNIX timestamps.
@@ -12,15 +10,15 @@ class ApiHelper {
       dates.forEach((min_max)=>{
         var condition_n = {};
         condition_n[field_name] = {};
-        if (min_max[0]) condition_n[field_name]['$gt'] = moment.unix(min_max[0]).toDate();
-        if (min_max[1]) condition_n[field_name]['$lt'] = moment.unix(min_max[1]).toDate();
+        if (min_max[0]) condition_n[field_name]['$gt'] = min_max[0];
+        if (min_max[1]) condition_n[field_name]['$lt'] = min_max[1];
         if (Object.keys(condition_n).length) params['$or'].push(condition_n);
       });
     } else {
       var min_max = dates[0],
         condition = {}
-      if (min_max[0]) params[field_name]['$gt'] = moment.unix(min_max[0]).toDate();
-      if (min_max[1]) params[field_name]['$lt'] = moment.unix(min_max[1]).toDate();
+      if (min_max[0]) condition['$gt'] = min_max[0];
+      if (min_max[1]) condition['$lt'] = min_max[1];
       if (Object.keys(condition).length) params[field_name] = condition;
     }
     return params;

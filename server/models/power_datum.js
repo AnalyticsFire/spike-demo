@@ -15,7 +15,7 @@ var PowerDatum = DB.sequelize.define(NAME, {
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
   time: {
-    type: DB.Sequelize.DATE,
+    type: DB.Sequelize.INTEGER,
   },
   consumption: DB.Sequelize.FLOAT,
   production: DB.Sequelize.FLOAT

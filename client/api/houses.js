@@ -1,5 +1,6 @@
-const ENDPOINT = '/data/v1/houses';
 import extend from 'extend';
+
+const ENDPOINT = '/data/v1/houses';
 
 class HousesApi {
 

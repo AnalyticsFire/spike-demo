@@ -2,12 +2,12 @@
 <rt-require dependency="./../power/power" as="Power"/>
 <div id="layout">
   <div class="alert alert-warning" rt-if="this.state.requesting_data">Retrieving houses...</div>
-  <h1 rt-if="this.state.house">{this.state.house.name}</h1>
 
   <h4>Select household:</h4>
   <select rt-if="this.state.houses" class="form-control" onChange="{this.setHouse}">
-    <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.react_key}">{house.data.name}</option>
+    <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.scoped_id}">{house.data.name}</option>
   </select>
+  <button rt-if="this.state.house" onClick="{this.refreshData}" class="btn btn-xs btn-default">Refresh House Data</button>
 
   <h4>Select dataset:</h4>
   <div class="btn-group" role="group">

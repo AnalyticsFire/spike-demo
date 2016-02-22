@@ -14,7 +14,13 @@ var House = DB.sequelize.define(NAME, {
     autoIncrement: true // Automatically gets converted to SERIAL for postgres
   },
   timezone: DB.Sequelize.STRING,
-  name: DB.Sequelize.STRING
+  name: DB.Sequelize.STRING,
+  data_until: {
+    type: DB.Sequelize.INTEGER,
+  },
+  data_from: {
+    type: DB.Sequelize.INTEGER,
+  }
 }, {
   paranoid: true,
   underscored: true,
@@ -29,26 +35,47 @@ var House = DB.sequelize.define(NAME, {
       }
       return multiplier;
     },
-    timeToDateString: function(timestamp){
+    unixToLocalDay: function(unix){
       var house = this;
-      return moment.tz(timestamp, house.timezone).format("YYYY-MM-DD");
+      return moment.tz(unix * 1000, house.timezone).startOf('day').unix();
     },
     aggregatePowerToEnergyData: function(){
       var house = this;
       return DB.EnergyDatum.destroy({where: {house_id: house.id}})
         .then(()=>{
-          return house.getPowerData();
+          return DB.PowerDatum.count({where: {house_id: house.id}})
         })
-        .then((power_data)=>{
-          var energy_data = new Map();
-          power_data.forEach((power_datum)=>{
-            var day = house.timeToDateString(power_datum.time),
-              energy_datum = energy_data.get(day) || {production: 0, consumption: 0, day: day, house_id: house.id};
-            energy_datum.production += power_datum.production / 1000; // convert Wh to kWh
-            energy_datum.consumption += power_datum.consumption / 1000; // convert Wh to kWh
-            energy_data.set(day, energy_datum);
+        .then((count)=>{
+          var limit = 0,
+            energy_data = new Map(),
+            promises = [];
+          while (limit < count){
+            let complete = DB.PowerDatum.findAll({where: {house_id: house.id}, limit: 1000, offset: limit, order: 'id ASC'})
+                    .then((power_data)=>{
+                      power_data.forEach((power_datum)=>{
+                        var day = house.unixToLocalDay(power_datum.time),
+                          energy_datum = energy_data.get(day) || {production: 0, consumption: 0, day: day, house_id: house.id};
+                        energy_datum.production += power_datum.production / 1000; // convert Wh to kWh
+                        energy_datum.consumption += power_datum.consumption / 1000; // convert Wh to kWh
+                        energy_data.set(day, energy_datum);
+                      });
+                    });
+            promises.push(complete);
+            limit += 1000;
+          }
+          return Promise.all(promises).then(()=>{
+            return DB.EnergyDatum.bulkCreate(Array.from(energy_data.values()), {validate: true});
           });
-          return DB.EnergyDatum.bulkCreate(Array.from(energy_data.values()), {validate: true});
+        })
+        .then(()=>{
+          return house.getPowerData({order: 'time DESC', limit: 1});
+        })
+        .then((max_data)=>{
+          house.data_until = max_data[0].time;
+          return house.getPowerData({order: 'time ASC', limit: 1});
+        }).then((min_data)=>{
+          house.data_from = min_data[0].time;
+          return house.save();
         });
     }
   },
@@ -58,16 +85,6 @@ var House = DB.sequelize.define(NAME, {
     },
     associate: ()=>{
       House.hasMany(DB.PowerDatum, {as: 'PowerData'});
-    },
-    getPowerDataByTime: (dates)=>{
-      var params = {
-        where: {time: {}},
-        attributes: ['id', 'time', 'consumption', 'production']
-      };
-      if (start_date) params.where.time.$gt = moment.utc(start_date).toDate();
-      if (end_date) params.where.time.$lt = moment.utc(end_date).toDate();
-
-      return House.getPowerData(params);
     }
   }
 });

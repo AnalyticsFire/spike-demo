@@ -1,5 +1,6 @@
 import extend from 'extend';
-import Loki from 'loki';
+import Loki from 'lokijs/src/lokijs';
+import moment from 'moment-timezone';
 
 import PowerDatum from './power_datum';
 import EnergyDatum from './energy_datum';
@@ -18,30 +19,57 @@ class House {
     var house = this;
     house.data = data;
     Object.assign(house, Databasable);
+    house.power_date_range = [house.default_power_start, house.default_power_end];
   }
 
   get scoped_id(){
     return `house-${this.data.id}`;
   }
 
+  get default_power_start(){
+    var house = this;
+    // 3600 * 24 seconds * 4 = 4 days.
+    return house.data.data_until - 3600 * 24 * 4;
+  }
+
+  get default_power_end(){
+    var house = this;
+    return house.data.data_until;
+  }
+
+  toDate(unix){
+    var house = this;
+    return moment.tz(unix * 1000, house.data.timezone).toDate();
+  }
+
   save(){
     var house = this;
-    return House.collection()
+    return House.collection(House.NAME)
       .then((house_collection)=>{
-        return house_collection.update(house.data);
+        house_collection.update(house.data);
+        return House.db.save();
       });
   }
 
   setPowerData(opts){
     var house = this;
-    return house.ensurePowerData(opts)
-      .then(()=>{
-        return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS)
-          .then((power_collection)=>{
-            var params = house.rangeToLokiParams('time', [opts.start_date, opts.end_date]);
-            house.power_data = power_collection.find(params).map((data)=>{ return new PowerDatum(data); })
+    opts = Object.assign({
+      dates: house.power_date_range
+    }, opts || {});
+    return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS)
+      .then((power_collection)=>{
+        return house.ensurePowerData(opts)
+          .then(()=>{
+            var params = house.rangeToLokiParams('time', opts.dates);
+            house.power_data = power_collection.find(params)
+                  .sort((pd1, pd2)=>{
+                    if (pd1.time === pd2.time) return 0;
+                    if (pd1.time > pd2.time) return 1;
+                    if (pd1.time < pd2.time) return -1;
+                  })
+                  .map((data)=>{ return new PowerDatum(data, house); })
           });
-      })
+      });
   }
 
   ensurePowerData(opts){
@@ -50,13 +78,16 @@ class House {
       end_date: undefined
     }, opts || {});
     var house = this,
-      query_ranges = DateRange.addRange([opts.start_date, opts.end_date], house.data.power_datum_ranges);
+      existing_ranges = house.data.power_datum_ranges || [],
+      query_ranges;
 
+    query_ranges = DateRange.addRange(opts.dates, existing_ranges);
     if (query_ranges.gaps_filled.length > 0){
-      house.getPowerData({dates: query_ranges.gaps_filled})
+      var params = {dates: query_ranges.gaps_filled};
+      return house.getPowerData(params)
         .then(()=>{
           house.data.power_datum_ranges = query_ranges.new_ranges;
-          return house.save();
+          house.save();
         });
     } else { return Promise.resolve(); }
   }
@@ -66,12 +97,31 @@ class House {
     params.house_id = house.data.id;
     return PowerDataApi.index(params)
       .then((power_data)=>{
-        return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS);
+        return house.collection(PowerDatum.NAME, PowerDatum.COLLECTION_OPTIONS)
                 .then((power_collection)=>{
                   power_collection.insert(power_data);
-                  return house.db.save();
+                  house.db.save();
                 });
       })
+  }
+
+  clearData(){
+    var house = this;
+    return new Promise((fnResolve, fnReject)=>{
+      house.collection(PowerDatum.NAME)
+        .then((power_collection)=>{
+          power_collection.removeWhere({});
+          house.db.save(()=>{
+            House.collection(House.NAME)
+              .then((house_collection)=>{
+                house_collection.remove(house.data);
+                House.db.save(()=>{
+                  fnResolve();
+                })
+              });
+          });
+        });
+    });
   }
 
   setEnergyData(opts){
@@ -81,7 +131,7 @@ class House {
         return house.collection(EnergyDatum.NAME, EnergyDatum.COLLECTION_OPTIONS)
           .then((energy_collection)=>{
             var params = house.rangeToLokiParams('day', [opts.start_date, opts.end_date]);
-            house.energy_data = energy_collection.find(params).map((data)=>{ return new EnergyDatum(data); })
+            house.energy_data = energy_collection.find(params).map((data)=>{ return new EnergyDatum(data, house); })
           });
       })
   }
@@ -108,7 +158,7 @@ class House {
     params.house_id = house.data.id;
     return EnergyDataApi.index(params)
       .then((energy_data)=>{
-        return house.collection(EnergyDatum.NAME, EnergyDatum.COLLECTION_OPTIONS);
+        return house.collection(EnergyDatum.NAME, EnergyDatum.COLLECTION_OPTIONS)
                 .then((energy_collection)=>{
                   energy_collection.insert(energy_data);
                   return house.db.save();
@@ -117,31 +167,22 @@ class House {
   }
 
   static ensureHouses(ids){
-    House.collection()
+    return House.collection(House.NAME)
       .then((house_collection)=>{
-        houses = house_collection.find({id: {$in: ids}});
-        if (houses.length !== ids.length){
-          required_ids = ArrayUtil.diff(ids, houses.map((house)=>{ return house.id; }));
-          return House.getHouses(required_ids)
-            .then((required_houses){
-              return houses.concat(required_houses);
+        var houses_data = ids ? house_collection.find({id: {$in: ids}}) : house_collection.find();
+        if (!ids && houses_data.length === 0 || ids && houses_data.length !== ids.length){
+          var required_ids = ids ? ArrayUtil.diff(ids, houses_data.map((data)=>{ return data.id; })) : undefined;
+          return HousesApi.index({id: ids})
+            .then((required_houses)=>{
+              required_houses.forEach((house_data)=>{
+                house_collection.insert(house_data);
+              });
+              House.db.save();
+              return houses_data.concat(required_houses);
             });
-        } else { return houses; }
-      }).then((house_data)=>{
+        } else { return Promise.resolve(houses_data); }
+      }).then((houses_data)=>{
         return houses_data.map((house_data)=>{ return new House(house_data); })
-      });
-  }
-
-  static getHouses(ids){
-    return HousesApi.index({id: ids})
-      .then((houses_data)=>{
-        return House.collection()
-          .then((house_collection)=>{
-            houses_data.forEach((house_data)=>{
-              house_collection.insert(house_data);
-            });
-            return houses_data;
-          });
       });
   }
 

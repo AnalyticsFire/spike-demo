@@ -1,8 +1,9 @@
 <div id="power_view">
-  <h2>Household 15-minute Power Statistics</h2>
   <div class="alert alert-warning" rt-if="this.state.loading_data">
     Retrieving power data for the {this.props.house.name} household...
   </div>
+  <h4>Select dates:</h4>
+  <div id="power_date_setter"></div>
   <table rt-if="this.props.view === 'table'" class="table">
     <thead>
       <tr>
@@ -13,7 +14,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr rt-repeat="power_datum in this.props.house.power_data" key="{power_datum.react_key}">
+      <tr rt-repeat="power_datum in this.props.house.power_data" key="{power_datum.scoped_id}">
         <td></td>
         <td>{power_datum.time_to_s}</td>
         <td>{power_datum.consumption_to_s}</td>

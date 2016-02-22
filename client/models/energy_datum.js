@@ -12,7 +12,6 @@ class EnergyDatum {
     energy_datum.house = house;
     data.day = moment.tz(data.day, house.data.timezone);
     energy_datum.data = data;
-    EnergyDatum.store.set(data.id, energy_datum);
   }
 
   get react_key(){

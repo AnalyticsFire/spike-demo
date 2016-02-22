@@ -5,18 +5,21 @@ import Power from './../power/power';
 function repeatHouse1(house, houseIndex) {
     return React.createElement('option', {
         'value': house.data.id,
-        'key': house.react_key
+        'key': house.scoped_id
     }, house.data.name);
 }
 export default function () {
-    return React.createElement('div', { 'id': 'layout' }, this.state.requesting_data ? React.createElement('div', { 'className': 'alert alert-warning' }, 'Retrieving houses...') : null, this.state.house ? React.createElement('h1', {}, this.state.house.name) : null, React.createElement('h4', {}, 'Select household:'), this.state.houses ? React.createElement.apply(this, [
+    return React.createElement('div', { 'id': 'layout' }, this.state.requesting_data ? React.createElement('div', { 'className': 'alert alert-warning' }, 'Retrieving houses...') : null, React.createElement('h4', {}, 'Select household:'), this.state.houses ? React.createElement.apply(this, [
         'select',
         {
             'className': 'form-control',
             'onChange': this.setHouse
         },
         _.map(this.state.houses, repeatHouse1.bind(this))
-    ]) : null, React.createElement('h4', {}, 'Select dataset:'), React.createElement('div', {
+    ]) : null, this.state.house ? React.createElement('button', {
+        'onClick': this.refreshData,
+        'className': 'btn btn-xs btn-default'
+    }, 'Refresh House Data') : null, React.createElement('h4', {}, 'Select dataset:'), React.createElement('div', {
         'className': 'btn-group',
         'role': 'group'
     }, React.createElement('button', {

@@ -27,7 +27,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr rt-repeat="energy_datum in this.props.house.energy_data" key="{energy_datum.react_key}">
+      <tr rt-repeat="energy_datum in this.props.house.energy_data" key="{energy_datum.scoped_id}">
         <td></td>
         <td>{energy_datum.day_to_s}</td>
         <td>{energy_datum.consumption_to_s}</td>

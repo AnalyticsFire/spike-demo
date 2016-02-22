@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 function repeatEnergy_datum1(energy_datum, energy_datumIndex) {
-    return React.createElement('tr', { 'key': energy_datum.react_key }, React.createElement('td', {}), React.createElement('td', {}, energy_datum.day_to_s), React.createElement('td', {}, energy_datum.consumption_to_s), React.createElement('td', {}, energy_datum.production_to_s));
+    return React.createElement('tr', { 'key': energy_datum.scoped_id }, React.createElement('td', {}), React.createElement('td', {}, energy_datum.day_to_s), React.createElement('td', {}, energy_datum.consumption_to_s), React.createElement('td', {}, energy_datum.production_to_s));
 }
 export default function () {
     return React.createElement('div', { 'id': 'energy_view' }, this.state.loading_data ? React.createElement('div', { 'className': 'alert alert-warning' }, '\n    Retrieving energy data for the ', this.props.house.name, ' household...\n  ') : null, this.props.view === 'graph' ? React.createElement('div', {}, React.createElement('h4', {}, 'Select Data'), React.createElement('div', {

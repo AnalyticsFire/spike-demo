@@ -22,7 +22,7 @@ var Energy = React.createClass({
     var energy = this,
       house = energy.props.house;
     energy.graph_title = 'Daily Consumption';
-    house.ensureEnergyData().then(()=>{
+    house.setEnergyData().then(()=>{
       energy.setState({loading_data: false});
       if (energy.props.view === 'graph') energy.initGraph();
     });
@@ -32,7 +32,7 @@ var Energy = React.createClass({
     var energy = this;
     if (new_props.house !== energy.state.house){
       energy.setState({loading_data: true});
-      new_props.house.ensureEnergyData().then(()=>{
+      new_props.house.setEnergyData().then(()=>{
         energy.setState({loading_data: false});
         if (energy.props.view === 'graph') energy.initGraph();
       });

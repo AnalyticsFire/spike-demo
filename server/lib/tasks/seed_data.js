@@ -18,7 +18,7 @@ export class PowerDataSeed {
       rows = [];
 
     csvStream.on("data", function(data){
-      data.time = moment.utc(parseInt(data.time * 1000)).format();
+      data.time = data.time;
       rows.push(data);
       if (rows.length % 100 === 0){
         DB.PowerDatum.bulkCreate(rows, {validate: true}).catch((error)=>{
@@ -47,13 +47,13 @@ export class PowerDataSeed {
 
   static generateCsv(opts, done){
     opts = extend({
-      start_date: moment().subtract(2, "months").unix(),
+      start_date: moment().subtract(120, "months").unix(),
       end_date: moment().unix(),
       interval: 900, // every 15 minutes (in s)
       average: 1400, // Wh
       path: DATA_PATH + "power_data.csv"
     }, opts || {});
-
+console.log(opts.start_date, opts.end_date)
     var row_date = opts.start_date,
       csvStream = csv.format({headers: true}),
       writableStream = fs.createWriteStream(opts.path),

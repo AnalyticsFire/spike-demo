@@ -3,16 +3,15 @@ import moment from 'moment-timezone';
 
 const NAME = 'PowerDatum';
 const COLLECTION_DEFAULTS = {
-  indices: ['time']
+  indices: ['time'],
+  unique_indices: ['time']
 };
 
 class PowerDatum {
   constructor(data, house){
     var power_datum = this;
     power_datum.house = house;
-    data.time = moment.tz(data.time, house.data.timezone);
     power_datum.data = data;
-    PowerDatum.store.set(data.id, power_datum);
   }
 
   get react_key(){

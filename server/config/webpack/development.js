@@ -41,5 +41,8 @@ module.exports = {
           d3: "d3",
           "window.d3": "d3"
       })
-  ]
+  ],
+  node: {
+    fs: "empty"
+  }
 }

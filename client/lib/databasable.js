@@ -1,5 +1,5 @@
-import Loki from 'lokijs';
-import LokiIndexedAdapter from 'loki/loki-indexed-adapter';
+import Loki from 'lokijs/src/lokijs';
+import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter';
 
 const DEFAULTS = {
   autosave: false
@@ -10,16 +10,16 @@ var databasable = {
   accessDb: function(db_name, opts){
     var databasable = this;
     opts = Object.assign(Object.assign({
-      persistenceMethod: 'adapter',
-      persistenceAdapter: new LokiIndexedAdapter(db_name)
+      adapter: new LokiIndexedAdapter(db_name)
     }, DEFAULTS), opts || {});
-    return new Promise((fnResolve, fnReject){
+    return new Promise((fnResolve, fnReject)=>{
       if (!databasable.db) {
         databasable.db = new Loki(db_name, opts);
         databasable.db.loadDatabase({}, ()=>{
           fnResolve(databasable.db);
         });
       } else { fnResolve(databasable.db); }
+
     });
   },
 
@@ -35,14 +35,19 @@ var databasable = {
   collection: function(collection_name, options){
     var databasable = this;
     return databasable.accessDb()
-      .then((db)=>{
-        var collection = db.getCollection(collection_name)
-        if (!collection){
-          collection = db.addCollection(collection_name, options);
-        }
-        return collection;
-      });
-  }
+        .then((db)=>{
+          var collection = db.getCollection(collection_name)
+          if (!collection){
+            collection = db.addCollection(collection_name, options);
+          }
+          if (options && options.unique_indices){
+            options.unique_indices.forEach((field)=>{
+              collection.ensureUniqueIndex(field);
+            });
+          }
+          return collection;
+        });
+  },
 
   rangeToLokiParams: function(attr, range){
     var date_params = {};
@@ -50,7 +55,7 @@ var databasable = {
       var start_condition = {},
         end_condition = {};
       date_params['$and'] = [start_condition, end_condition];
-      start_condition[attr] = {'$lt': range[1]};
+      start_condition[attr] = {'$gt': range[0]};
       end_condition[attr] = {'$lt': range[1]};
     } else if (range[0] !== undefined) {
       date_params[attr] = {'$gt': range[0]}
@@ -62,4 +67,4 @@ var databasable = {
 
 };
 
-export default databaseable;
+export default databasable;
