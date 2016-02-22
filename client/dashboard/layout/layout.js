@@ -24,16 +24,23 @@ var Layout = React.createClass({
     var layout = this;
     // window.addEventListener('resize', this.handleResize);
     House.ensureHouses().then((houses)=>{
-      layout.setState({houses: houses, house: houses[0], requesting_data: false});
+      layout.setState({
+        houses: houses,
+        house: houses[0],
+        requesting_data: false,
+        month: houses[0].current_month,
+        year: houses[0].current_year
+      });
     });
   },
 
   setHouse: function(event){
     var layout = this,
       house_id = event.target.value,
+      old_house = layout.state.house,
       house = layout.state.houses.find((house)=>{ return house.data.id == house_id });
     layout.setState({house: house}, ()=>{
-      house.closeDb();
+      old_house.closeDb();
     });
   },
 
@@ -48,6 +55,16 @@ var Layout = React.createClass({
     var layout = this,
       dataset = event.target.dataset.value;
     layout.setState({dataset: dataset});
+  },
+
+  setYear: function(event){
+    var layout = this,
+      year = event.target.dataset.value,
+      house = layout.state.house;
+    if (year != house.current_year){
+      house.setYear(year);
+      layout.setState({year: year});
+    }
   },
 
   refreshData: function(){

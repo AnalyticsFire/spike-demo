@@ -6,7 +6,7 @@ const INTERPOLATION = 'cardinal';
 class SplineStackChart extends LineChart {
 
   get chart_options(){
-    return Object.assign(LineChart.DEFAULTS, {
+    return Object.assign(Object.assign({}, LineChart.DEFAULTS), {
       interpolation: INTERPOLATION
     });
   }
@@ -63,7 +63,7 @@ class SplineStackChart extends LineChart {
 
     var stack = spline_stack.svg.selectAll(".d3-chart-spline-stack")
         .data(data.series);
-    [stack.enter().append("path"), stack.transition()].forEach((paths)=>{
+    [stack.enter().append("path"), stack].forEach((paths)=>{
       spline_stack.applyData(paths);
     });
     stack.exit().remove();
@@ -72,7 +72,7 @@ class SplineStackChart extends LineChart {
       data.series.forEach((series)=>{
         var dots = spline_stack.svg.selectAll(".d3-chart-spline-dot." + series.css_class)
             .data(series.values);
-        [dots.enter().append("circle"), dots.transition()].forEach((circles)=>{
+        [dots.enter().append("circle"), dots].forEach((circles)=>{
           spline_stack.applyDots(series, circles);
         });
         dots.exit().remove();
@@ -83,7 +83,7 @@ class SplineStackChart extends LineChart {
   applyData(paths){
     var spline_stack = this;
     paths
-      .attr("class", function(series){"d3-chart-spline-stack " + series.css_class;})
+      .attr("class", function(series){ return "d3-chart-spline-stack " + series.css_class;})
       .attr("d", function(series){ return spline_stack.fnArea(series.values); })
       .style("fill", function(series){ return spline_stack.fnColor(series.title); })
       .attr('opacity', 1);
@@ -92,7 +92,7 @@ class SplineStackChart extends LineChart {
   applyDots(series, circles){
     var spline_stack = this;
     circles
-      .attr('class', 'd3-chart-spline-dot' + series.css_class)
+      .attr('class', 'd3-chart-spline-dot ' + series.css_class)
       .attr("r", 2)
       .attr("cx", function(d, i){ return spline_stack.x_scale(d.x); })
       .attr("cy", function(d, i){ return spline_stack.y_scale(d.y + d.y0); })

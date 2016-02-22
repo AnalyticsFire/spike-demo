@@ -20,14 +20,14 @@ class PowerDatum {
 
   get time_to_date(){
     var power_datum = this,
-      moment_tz = moment.tz(power_datum.data.time, power_datum.house.data.timezone);
-    // will have to do some additional math here to account for local offset.
-    return moment(moment_tz.toArray()).toDate();
+      house = power_datum.house;
+    return house.toDate(power_datum.data.time);
   }
 
   get time_to_s(){
-    var power_datum = this;
-    return power_datum.data.time.format('YYYY-MM-DD HH:mm');
+    var power_datum = this,
+      moment_tz = moment.tz(power_datum.data.time * 1000, power_datum.house.data.timezone);
+    return moment_tz.format('YYYY-MM-DD HH:mm');
   }
   get consumption_to_s(){
     var power_datum = this;

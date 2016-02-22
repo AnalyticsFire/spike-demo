@@ -10,7 +10,6 @@ class EnergyDatum {
   constructor(data, house){
     var energy_datum = this;
     energy_datum.house = house;
-    data.day = moment.tz(data.day, house.data.timezone);
     energy_datum.data = data;
   }
 
@@ -18,16 +17,16 @@ class EnergyDatum {
     return `energy-datum-${this.data.id}`;
   }
 
+  // returns a datestamp that has the client timezone, but actually is house local time.
   get day_to_date(){
     var energy_datum = this,
-      moment_tz = moment.tz(energy_datum.data.day, energy_datum.house.data.timezone);
-    // will have to do some additional math here to account for local offset.
-    return moment(moment_tz.toArray()).toDate();
+      house = energy_datum.house;
+    return house.toDate(energy_datum.data.day);
   }
 
   get day_to_s(){
     var energy_datum = this;
-    return energy_datum.data.day.format('YYYY-MM-DD');
+    return moment.tz(energy_datum.data.day * 1000, energy_datum.house.data.timezone).format('YYYY-MM-DD');
   }
 
   get consumption_to_s(){

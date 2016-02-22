@@ -34,15 +34,19 @@ var Power = React.createClass({
     });
   },
 
+  componentWillUnmount: function(){
+    var power = this;
+    power.destroyGraph();
+  },
+
   componentWillReceiveProps: function(new_props){
     var power = this;
-    if (new_props.house !== power.state.house){
+    if (new_props.house !== power.props.house){
       // house will change.
       power.setState({loading_data: true});
       new_props.house.setPowerData().then(()=>{
         power.setState({loading_data: false});
         if (power.props.view === 'graph'){
-          power.initDateRange();
           power.initGraph();
         }
       });
@@ -56,8 +60,12 @@ var Power = React.createClass({
       house = power.props.house;
     // view has changed from graph to table.
     if (prev_props.view !== 'graph' && power.props.view === 'graph'){
-      power.initDateRange();
       power.initGraph();
+    }
+    if (prev_props.house !== house) power.initDateRange();
+    var need_update = false;
+    if (prev_props.year !== power.props.year){
+      power.updateCurrentMonth();
     }
   },
 
@@ -75,7 +83,7 @@ var Power = React.createClass({
         range_attr: 'y',
         include_dots: true,
         titleizeDatum: (series, d)=>{
-          return series.title + '<br/>' + Math.round(d.y) + ' W<br/>' + moment.tz(d.x.getTime(), house.timezone).format('MMM D [at] HH:mm')
+          return series.title + '<br/>' + Math.round(d.y) + ' W<br/>' + house.formatDate(d.power_datum.data.time, 'MMM D [at] HH:mm');
         }
       });
       jQuery('#power_graph').tooltip({
@@ -97,7 +105,8 @@ var Power = React.createClass({
         title: 'Net Power Consumption',
         values: house.power_data.map((power_datum)=>{
           return {
-            x: house.toDate(power_datum.data.time),
+            power_datum: power_datum,
+            x: power_datum.time_to_date,
             y: Math.max(0, power_datum.data.consumption - power_datum.data.production) }
         })
       },
@@ -105,7 +114,8 @@ var Power = React.createClass({
         title: 'Power Production',
         values: house.power_data.map((power_datum)=>{
           return {
-            x: house.toDate(power_datum.data.time),
+            power_datum: power_datum,
+            x: power_datum.time_to_date,
             y: power_datum.data.production }
         })
       };
@@ -124,7 +134,7 @@ var Power = React.createClass({
         container: '#power_date_setter',
         outer_height: 100,
         maxDelta: function(changed_date, other_date){
-          if (Math.abs(changed_date.getTime() - other_date.getTime()) > 3600 * 24 * 7 * 1000){
+          if (Math.abs(changed_date.getTime() - other_date.getTime()) > 3600 * 24 * 4 * 1000){
             if (changed_date > other_date){
               return new Date(changed_date.getTime() - 3600 * 24 * 4 * 1000);
             } else {
@@ -141,26 +151,44 @@ var Power = React.createClass({
         house.power_date_range = [Math.round(min.getTime() / 1000), Math.round(max.getTime() / 1000)]
         house.setPowerData()
           .then(()=>{
-            power.updateGraph();
+            if (power.props.view === 'graph') power.updateGraph();
+            else power.forceUpdate();
           });
       }, 500);
     };
-    var four_week_start = house.data.data_until - 3600 * 24 * 28,
-      data_from = Math.max(four_week_start, house.data.data_from);
     power.date_range_slider.drawData({
-      abs_min: house.toDate(four_week_start),
-      abs_max: house.toDate(house.data.data_until),
-      current_min: house.toDate(house.default_power_start),
-      current_max: house.toDate(house.default_power_end)
+      abs_min: house.current_month_moment.toDate(),
+      abs_max: house.end_of_current_data_moment.toDate(),
+      current_min: house.toDate(house.power_date_range[0]),
+      current_max: house.toDate(house.power_date_range[1])
     });
   },
 
   destroyGraph: function(){
     var power = this;
-    document.getElementById('power_date_setter').innerHTML = '';
     document.getElementById('power_graph').innerHTML = '';
-    power.date_range_slider = undefined;
     power.graph = undefined;
+  },
+
+  setMonth: function(event){
+    var power = this,
+      house = power.props.house,
+      month = event.target.dataset.value;
+    if (month !== house.current_month){
+      var need_update = house.setMonth(month);
+      if (need_update) power.updateCurrentMonth();
+    }
+  },
+
+  updateCurrentMonth: function(){
+    var power = this,
+      house = power.props.house;
+    power.initDateRange();
+    house.setPowerData()
+      .then(()=>{
+        power.forceUpdate();
+        if (power.props.view === 'graph') power.updateGraph();
+      });
   },
 
   render: function() {

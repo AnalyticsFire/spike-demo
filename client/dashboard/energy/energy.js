@@ -28,9 +28,14 @@ var Energy = React.createClass({
     });
   },
 
+  componentWillUnmount: function(){
+    var energy = this;
+    energy.destroyGraph();
+  },
+
   componentWillReceiveProps: function(new_props){
     var energy = this;
-    if (new_props.house !== energy.state.house){
+    if (new_props.house !== energy.props.house){
       energy.setState({loading_data: true});
       new_props.house.setEnergyData().then(()=>{
         energy.setState({loading_data: false});
@@ -44,6 +49,9 @@ var Energy = React.createClass({
     var energy = this,
       house = energy.props.house;
     if (prev_props.view !== 'graph' && energy.props.view === 'graph') energy.initGraph();
+    if (prev_props.year !== energy.props.year){
+      energy.updateCurrentMonth();
+    }
   },
 
   setGraphAttr: function(event){
@@ -65,17 +73,17 @@ var Energy = React.createClass({
       energy.graph = new CalendarGridChart({
         container: '#energy_graph',
         outer_width: 800,
-        outer_height: 200,
+        outer_height: 300,
         date_attr: 'day',
         color: '#0404B4',
-        toDate: (energy_datum)=>{ return energy_datum.data.day.toDate(); }
+        toDate: (energy_datum)=>{ return energy_datum.day_to_date; }
       });
       jQuery('#energy_graph').tooltip({
         selector: '.d3-chart-grid-unit',
         container: 'body',
         title: function(){
           var energy_datum = this.__data__,
-            date_s = d3.time.format('%a %b %d, %Y')(energy_datum.data.day.toDate()),
+            date_s = d3.time.format('%a %b %d, %Y')(energy_datum.day_to_date),
             range_value = `${Math.round(energy_datum.data[energy.state.graph_attr])} kWh`;
           return `${date_s}: ${range_value}`;
         }
@@ -101,6 +109,21 @@ var Energy = React.createClass({
     var energy = this;
     document.getElementById('energy_graph').innerHTML = '';
     energy.graph = undefined;
+  },
+
+  updateCurrentMonth: function(){
+    var energy = this,
+      house = energy.props.house;
+    house.setEnergyData()
+      .then(()=>{
+        if (energy.props.view === 'graph'){
+          // no update necessary since year already updated in layout.rt.
+          energy.updateGraph();
+        } else {
+          // force update to render correct data in table.
+          energy.forceUpdate();
+        }
+      });
   },
 
   render: function() {

@@ -37,6 +37,24 @@
       type="button" class="btn btn-primary">Table</button>
   </div>
 
-  <Energy rt-if="this.state.house && this.state.dataset === 'energy'" house="{this.state.house}" view="{this.state.view}"></Energy>
-  <Power rt-if="this.state.house && this.state.dataset === 'power'" house="{this.state.house}" view="{this.state.view}"></Power>
+  <h4>Select dates:</h4>
+  <div class="btn-group">
+    <button
+      rt-if="this.state.house"
+      rt-repeat="year in this.state.house.years"
+      data-value="{year}"
+      key="data-year-{year}"
+      class="btn-info btn btn-sm"
+      rt-class="{active: year == this.state.house.current_year}"
+      onClick="{this.setYear}">{year}</button>
+  </div><br/>
+
+  <Energy rt-if="this.state.house && this.state.dataset === 'energy'"
+    house="{this.state.house}"
+    view="{this.state.view}"
+    year="{this.state.year}"></Energy>
+  <Power rt-if="this.state.house && this.state.dataset === 'power'"
+    house="{this.state.house}"
+    view="{this.state.view}"
+    year="{this.state.year}"></Power>
 </div>

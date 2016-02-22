@@ -32,18 +32,18 @@ var databasable = {
     }
   },
 
-  collection: function(collection_name, options){
+  collection: function(db_name, collection_name, options){
     var databasable = this;
-    return databasable.accessDb()
+    return databasable.accessDb(db_name)
         .then((db)=>{
           var collection = db.getCollection(collection_name)
           if (!collection){
             collection = db.addCollection(collection_name, options);
-          }
-          if (options && options.unique_indices){
-            options.unique_indices.forEach((field)=>{
-              collection.ensureUniqueIndex(field);
-            });
+            if (options && options.unique_indices){
+              options.unique_indices.forEach((field)=>{
+                collection.ensureUniqueIndex(field);
+              });
+            }
           }
           return collection;
         });
@@ -55,12 +55,12 @@ var databasable = {
       var start_condition = {},
         end_condition = {};
       date_params['$and'] = [start_condition, end_condition];
-      start_condition[attr] = {'$gt': range[0]};
-      end_condition[attr] = {'$lt': range[1]};
+      start_condition[attr] = {'$gte': range[0]};
+      end_condition[attr] = {'$lte': range[1]};
     } else if (range[0] !== undefined) {
-      date_params[attr] = {'$gt': range[0]}
+      date_params[attr] = {'$gte': range[0]}
     } else if (range[1] !== undefined) {
-      date_params[attr] = {'$lt': range[1]}
+      date_params[attr] = {'$lte': range[1]}
     }
     return date_params;
   }

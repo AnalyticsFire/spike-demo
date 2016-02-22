@@ -6,7 +6,7 @@ class CalendarGridChart extends Chart{
 
   get chart_options(){
     var chart = this;
-    return extend(Chart.DEFAULTS, {
+    return extend(Object.assign({}, Chart.DEFAULTS), {
       margin: {top: 30, left: 150, bottom: 0, right: 0},
       grid_padding: 0.05,
       parse_date_format: '%Y-%m-%d',
@@ -103,6 +103,7 @@ class CalendarGridChart extends Chart{
 
   drawData(data){
     var grid_chart = this;
+    grid_chart.i = grid_chart.i || 1;
     data = grid_chart.serializeData(data);
 
     // calibrate axes
@@ -118,9 +119,9 @@ class CalendarGridChart extends Chart{
 
    var grid_units = grid_chart.svg.selectAll(".d3-chart-grid-unit")
         .data(data.values);
-    grid_chart.applyData(data, grid_units.enter().append("rect"));
-    grid_chart.applyData(data, grid_units.transition());
     grid_units.exit().remove();
+    grid_chart.applyData(data, grid_units.enter().append("rect"));
+    grid_chart.applyData(data, grid_units);
   }
 
   // helper method for drawData.
@@ -128,7 +129,7 @@ class CalendarGridChart extends Chart{
     var grid_chart = this,
         series_class = "d3-chart-grid-unit " + data.css_class;
       elements
-          .attr("class", function(d){ return series_class; })
+          .attr("class", series_class)
           .attr("y", function(d) {
             var bottom = grid_chart.y_scale(grid_chart.toMonthString(d)),
               middle = grid_chart.y_scale.rangeBand() / 2 - grid_chart.grid_unit_size / 2;
@@ -140,10 +141,10 @@ class CalendarGridChart extends Chart{
           })
           .attr("width", function(d) { return grid_chart.grid_unit_size; })
           .attr('fill', grid_chart.color)
-          .attr("opacity", function(d) { return grid_chart.applyOpacity(grid_chart.rangeValue(d), data.range);  });
+          .attr("opacity", function(d) { return grid_chart.calculateOpacity(75, data.range);  });
   }
 
-  applyOpacity(value, range){
+  calculateOpacity(value, range){
     return Math.max(0, Math.min(1, 1 - (range.max - (value - range.min)) / range.diff));
   };
 

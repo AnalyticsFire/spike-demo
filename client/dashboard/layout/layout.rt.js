@@ -8,6 +8,14 @@ function repeatHouse1(house, houseIndex) {
         'key': house.scoped_id
     }, house.data.name);
 }
+function repeatYear2(year, yearIndex) {
+    return React.createElement('button', {
+        'data-value': year,
+        'key': 'data-year-' + year,
+        'className': 'btn-info btn btn-sm' + ' ' + _.keys(_.pick({ active: year == this.state.house.current_year }, _.identity)).join(' '),
+        'onClick': this.setYear
+    }, year);
+}
 export default function () {
     return React.createElement('div', { 'id': 'layout' }, this.state.requesting_data ? React.createElement('div', { 'className': 'alert alert-warning' }, 'Retrieving houses...') : null, React.createElement('h4', {}, 'Select household:'), this.state.houses ? React.createElement.apply(this, [
         'select',
@@ -45,11 +53,17 @@ export default function () {
         'className': _.keys(_.pick({ active: this.state.view === 'table' }, _.identity)).join(' ') + ' ' + 'btn btn-primary',
         'onClick': this.setView,
         'type': 'button'
-    }, 'Table')), this.state.house && this.state.dataset === 'energy' ? React.createElement(Energy, {
+    }, 'Table')), React.createElement('h4', {}, 'Select dates:'), React.createElement.apply(this, [
+        'div',
+        { 'className': 'btn-group' },
+        this.state.house ? _.map(this.state.house.years, repeatYear2.bind(this)) : null
+    ]), React.createElement('br', {}), this.state.house && this.state.dataset === 'energy' ? React.createElement(Energy, {
         'house': this.state.house,
-        'view': this.state.view
+        'view': this.state.view,
+        'year': this.state.year
     }) : null, this.state.house && this.state.dataset === 'power' ? React.createElement(Power, {
         'house': this.state.house,
-        'view': this.state.view
+        'view': this.state.view,
+        'year': this.state.year
     }) : null);
 };
