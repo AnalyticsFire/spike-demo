@@ -41,9 +41,9 @@ DB.sync().then(()=>{
  * Development Server
  */
 
-var config = require('./../client/config/webpack'),
+var config = require('./../client/config/development/webpack'),
   dev_server = new WebpackDevServer(webpack(config), {
-    contentBase: __dirname + '/../client/build/development',
+    contentBase: './../client/build/development',
     publicPath: "/assets/",
     proxy: {
       '/data*': `http://localhost:${API_PORT}`,

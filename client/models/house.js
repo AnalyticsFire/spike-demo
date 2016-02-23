@@ -129,7 +129,6 @@ class House {
                     if (pd1.time < pd2.time) return -1;
                   })
                   .map((data)=>{ return new PowerDatum(data, house); });
-            debugger
           });
       });
   }
