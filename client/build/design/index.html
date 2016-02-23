@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/assets/css/vendor.css" rel="stylesheet" type="text/css">
-    <link href="/assets/css/application.css" rel="stylesheet" type="text/css">
+    <link href="/assets/style.css" rel="stylesheet" type="text/css"/>
     <title>Spike Prototype</title>
   </head>
   <body>
@@ -23,7 +22,10 @@
             </div>
           </div>
         </nav>
-        <div id="root"></div>
+        <div class="container">
+          <div id="compiling_layouts" class="alert alert-warning">Compiling layouts and styles....</div>
+          <div id="root"></div>
+        </div>
       </div>
       <div id="spike_footer">
         <div class="container">Footer</div>
@@ -35,7 +37,6 @@
     // in developer tools for the native `fetch`.
     self.fetch = null;
   </script>
-  <script src="http://localhost:3000/webpack-dev-server.js"></script>
-  <script src="/assets/js/vendor.js"></script>
-  <script src="/assets/js/application.js"></script>
+  <script src="/assets/sass/dist/sass.js"></script>
+  <script src="/assets/app.js"></script>
 </html>

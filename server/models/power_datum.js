@@ -1,6 +1,6 @@
 import DB from "./../config/database";
 import extend from 'extend';
-import ApiHelper from './../helpers/api_helper';
+import ApiHelper from './../lib/api_helper';
 
 const NAME = 'PowerDatum';
 
