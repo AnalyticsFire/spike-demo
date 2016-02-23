@@ -1,20 +1,20 @@
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import webpack from 'webpack';
 
-const ROOT = __dirname + '/../../../';
+const CLIENT = __dirname + '/../..';
+const ROOT = CLIENT + '/..';
 
 module.exports = {
   entry: {
-    app: ROOT + 'client/config/app',
-    style: ROOT + 'client/config/style'
+    app: CLIENT + '/config/design/app',
+    style: CLIENT + '/config/design/style'
   },
-  devtool: 'source-map',
   output: {
     filename: '[name].js',
-    path: ROOT + 'client/build/design/assets'
+    path: CLIENT + '/build/design/assets'
   },
   module: {
-    loaders: [
+      loaders: [
         {
           test: /\.scss$/,
           loader: ExtractTextPlugin.extract("style-loader", "raw-loader!sass-loader")
@@ -22,15 +22,17 @@ module.exports = {
           test: /\.css$/,
           loader: ExtractTextPlugin.extract("style-loader", "raw-loader")
         }, {
-          test: /\.js$/,
-          loader: 'babel'
-        }
-    ]
+            test: /\.js$/,
+            loader: 'babel'
+          }, {
+            test: /\.json$/,
+            loader: 'json'
+          }
+      ]
   },
   sassLoader: {
-    includePaths: [ROOT + 'client', ROOT + 'node_modules']
+    includePaths: [CLIENT, ROOT + '/node_modules']
   },
-  // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
   plugins: [
       new ExtractTextPlugin("style.css", {
         allChunks: true
@@ -39,6 +41,10 @@ module.exports = {
           $: "jquery",
           jQuery: "jquery",
           "window.jQuery": "jquery"
+      }),
+      new webpack.ProvidePlugin({
+          d3: "d3",
+          "window.d3": "d3"
       })
   ],
   node: {
@@ -46,8 +52,8 @@ module.exports = {
   },
   resolve: {
       alias: {
-          api: ROOT + 'client/api/design',
-          config: ROOT + 'client/config/design'
+          api: CLIENT + '/api/' + process.env.NODE_ENV,
+          config: CLIENT + '/config/' + process.env.NODE_ENV
       }
   }
-};
+}

@@ -1,6 +1,6 @@
 import Styles from 'config/styles';
 import Templates from 'config/templates';
-import app from './../app';
+import app from './../../app';
 
 Promise.all([
   Templates.sync(),

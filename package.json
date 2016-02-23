@@ -45,6 +45,7 @@
     "babel-standalone": "6.4.4",
     "gulp": "^3.9.0",
     "gulp-util": "3.0.7",
+    "gulp-copy": "0.0.2",
     "jasmine-core": "2.4.1",
     "karma": "^0.13.19",
     "karma-babel-preprocessor": "^6.0.1",

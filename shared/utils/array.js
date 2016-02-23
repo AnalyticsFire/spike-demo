@@ -12,6 +12,17 @@ class ArrayUtil {
     return map;
   }
 
+  static any(a, fnCondition){
+    var any = false;
+    for (var elem of a){
+      if (fnCondition(elem)){
+        any = true;
+        break;
+      }
+    }
+    return any;
+  }
+
   static all(a, fnCondition){
     var all = true;
     for (var elem of a){

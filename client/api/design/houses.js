@@ -1,8 +1,12 @@
 class HousesApi {
 
   static index(params){
-    return Promise.resolve({
-
+    return jQuery.ajax({
+      url: '/data/houses.json',
+      dataType: 'json'
+    })
+    .then((res)=>{
+      return res.data;
     });
   }
 

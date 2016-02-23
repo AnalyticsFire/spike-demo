@@ -23,7 +23,9 @@ var Layout = React.createClass({
   componentDidMount: function() {
     var layout = this;
     // window.addEventListener('resize', this.handleResize);
+    console.log('a')
     House.ensureHouses().then((houses)=>{
+      console.log('b')
       layout.setState({
         houses: houses,
         house: houses[0],

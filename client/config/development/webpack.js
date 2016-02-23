@@ -10,7 +10,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    path: CLIENT + '/build/development'
+    path: CLIENT + '/build/' + process.env.NODE_ENV
   },
   module: {
       loaders: [
@@ -23,6 +23,9 @@ module.exports = {
           }, {
             test: /\.js$/,
             loader: 'babel'
+          }, {
+            test: /\.json$/,
+            loader: 'json'
           }
       ]
   },
@@ -45,8 +48,8 @@ module.exports = {
   },
   resolve: {
       alias: {
-          api: CLIENT + '/api/development',
-          config: CLIENT + '/config/development'
+          api: CLIENT + '/api/' + process.env.NODE_ENV,
+          config: CLIENT + '/config/' + process.env.NODE_ENV
       }
   }
 }
