@@ -1,5 +1,5 @@
 import React from 'react';
-import energyRt from './energy.rt.js';
+import Templates from 'config/templates';
 import House from './../../models/house';
 import CalendarGridChart from './../../d3/grid/calendar_grid';
 
@@ -26,11 +26,6 @@ var Energy = React.createClass({
       energy.setState({loading_data: false});
       if (energy.props.view === 'graph') energy.initGraph();
     });
-  },
-
-  componentWillUnmount: function(){
-    var energy = this;
-    energy.destroyGraph();
   },
 
   componentWillReceiveProps: function(new_props){
@@ -127,6 +122,7 @@ var Energy = React.createClass({
   },
 
   render: function() {
+    var energyRt = Templates.forComponent('energy');
     return energyRt.call(this);
   }
 });

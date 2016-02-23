@@ -37,8 +37,9 @@ export default function (opt) {
             generatedFile: replaceExtension(file.relative)
         }, opt);
 
-        if (options.suffix && !options.name) {
-            options.name = normalizeName(path.basename(filePath, path.extname(filePath))) + options.suffix;
+        if (options.modules === 'none' && !options.name) {
+            options.name = normalizeName(path.basename(filePath, path.extname(filePath)));
+            console.log('options.name ', options.name)
         }
 
         try {

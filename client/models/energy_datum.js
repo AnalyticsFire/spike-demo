@@ -13,7 +13,7 @@ class EnergyDatum {
     energy_datum.data = data;
   }
 
-  get react_key(){
+  get scoped_id(){
     return `energy-datum-${this.data.id}`;
   }
 

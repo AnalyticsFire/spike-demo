@@ -14,7 +14,7 @@ class PowerDatum {
     power_datum.data = data;
   }
 
-  get react_key(){
+  get scoped_id(){
     return `power-datum-${this.data.id}`;
   }
 

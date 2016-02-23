@@ -8,12 +8,13 @@ import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import bodyParser from 'body-parser';
 
-
 import DB from './config/database';
 import routes from './routes';
 
 const API_PORT = 8080;
 const APP_PORT = 3000;
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var api = express();
 
@@ -40,7 +41,7 @@ DB.sync().then(()=>{
  * Development Server
  */
 
-var config = require('./config/webpack/development'),
+var config = require('./../client/config/webpack'),
   dev_server = new WebpackDevServer(webpack(config), {
     contentBase: __dirname + '/../client/build/development',
     publicPath: "/assets/",

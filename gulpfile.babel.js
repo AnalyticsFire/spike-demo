@@ -6,7 +6,6 @@ import gutil from 'gulp-util';
 import DB from './server/config/database';
 import {PowerDataSeed, HouseSeed} from './server/lib/tasks/seed_data';
 import rtCompile from './server/lib/tasks/react_template_compile';
-import rt_config from './server/config/react_templates';
 
 gulp.task('generate_power_csv', function(done){
   DB.sync().then(()=>{
@@ -28,24 +27,24 @@ gulp.task('save_house_csv', function(done){
 
 gulp.task('compile_react_templates', function() {
     gulp.src('./client/dashboard/**/*.rt')
-        .pipe(rtCompile(rt_config))
+        .pipe(rtCompile({
+          modules: 'es6',
+          targetVersion: '0.14.0',
+          suffix: '.rt'
+        }))
         .pipe(gulp.dest('./client/dashboard'));
 });
 
-
+// right now, build only available for design.
 gulp.task('build', function(done) {
   var config, env;
 
-  if (yargs.argv.production){
-    env = 'production';
-  } else if (yargs.argv.design){
-    env = 'design';
-  } else if (yargs.argv.test){
-    env = 'test';
+  if (yargs.argv.design){
+    process.env.NODE_ENV = process.env.NODE_ENV || 'design';
   } else {
     throw new gutil.PluginError("webpack", "Must include '--production' or '--design' option.");
   }
-  config = require(`${__dirname}/server/config/webpack/${env}`);
+  config = require(`${__dirname}/client/config/webpack.js`);
   // run webpack
   webpack(config, function(err, stats) {
     if(err) throw new gutil.PluginError("webpack", err);
@@ -54,15 +53,4 @@ gulp.task('build', function(done) {
     }));
     done();
   });
-});
-
-gulp.task('test', function(done) {
-  var Jasmine = require('jasmine');
-  var jasmine = new Jasmine();
-
-  jasmine.loadConfigFile('test/jasmine.json');
-  jasmine.configureDefaultReporter({
-      showColors: true
-  });
-  jasmine.execute();
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import layoutRt from './layout.rt.js';
+import Templates from 'config/templates';
 import House from './../../models/house';
 import PowerDatum from './../../models/power_datum';
 
@@ -81,6 +81,7 @@ var Layout = React.createClass({
   },
 
   render: function() {
+    var layoutRt = Templates.forComponent('layout');
     return layoutRt.call(this);
   }
 });

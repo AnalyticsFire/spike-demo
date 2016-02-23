@@ -2,7 +2,7 @@ import React from 'react';
 import moment from 'moment-timezone';
 import _ from 'lodash';
 
-import powerRt from './power.rt.js';
+import Templates from 'config/templates';
 import House from './../../models/house';
 import SplineStackChart from './../../d3/line/spline_stack';
 import DateRangeSlider from './../../d3/sliders/date_range';
@@ -32,11 +32,6 @@ var Power = React.createClass({
         power.initGraph();
       }
     });
-  },
-
-  componentWillUnmount: function(){
-    var power = this;
-    power.destroyGraph();
   },
 
   componentWillReceiveProps: function(new_props){
@@ -192,6 +187,7 @@ var Power = React.createClass({
   },
 
   render: function() {
+    var powerRt = Templates.forComponent('power');
     return powerRt.call(this);
   }
 });

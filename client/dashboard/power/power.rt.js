@@ -9,7 +9,10 @@ function repeatMonth1(month, monthIndex) {
     }, month);
 }
 function repeatPower_datum2(power_datum, power_datumIndex) {
-    return React.createElement('tr', { 'key': power_datum.scoped_id }, React.createElement('td', {}, power_datum.data.id), React.createElement('td', {}, power_datum.time_to_s), React.createElement('td', {}, power_datum.consumption_to_s), React.createElement('td', {}, power_datum.production_to_s));
+    return React.createElement('tr', {
+        'className': 'fuck-you',
+        'key': power_datum.scoped_id
+    }, React.createElement('td', {}, power_datum.data.id), React.createElement('td', {}, power_datum.time_to_s), React.createElement('td', {}, power_datum.consumption_to_s), React.createElement('td', {}, power_datum.production_to_s));
 }
 export default function () {
     return React.createElement('div', { 'id': 'power_view' }, React.createElement.apply(this, [

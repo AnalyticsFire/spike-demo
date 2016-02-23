@@ -24,7 +24,7 @@
     </thead>
     <tbody>
       <tr rt-repeat="power_datum in this.props.house.power_data" key="{power_datum.scoped_id}">
-        <td>{power_datum.data.id}</td>
+        <td></td>
         <td>{power_datum.time_to_s}</td>
         <td>{power_datum.consumption_to_s}</td>
         <td>{power_datum.production_to_s}</td>

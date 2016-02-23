@@ -1,15 +1,16 @@
 import webpack from 'webpack';
 
-const ROOT = __dirname + '/../../../';
+const CLIENT = __dirname + '/../..';
+const ROOT = CLIENT + '/..';
 
 module.exports = {
   entry: {
-    app: ROOT + 'client/app',
-    style: ROOT + 'client/style'
+    app: CLIENT + '/config/development/app',
+    style: CLIENT + '/config/development/style'
   },
   output: {
     filename: '[name].js',
-    path: ROOT + 'client/build/development'
+    path: CLIENT + '/build/development'
   },
   module: {
       loaders: [
@@ -22,14 +23,11 @@ module.exports = {
           }, {
             test: /\.js$/,
             loader: 'babel'
-          }, {
-            test: /\.json$/,
-            loader: 'json-loader'
           }
       ]
   },
   sassLoader: {
-    includePaths: [ROOT + 'client', ROOT + 'node_modules']
+    includePaths: [CLIENT, ROOT + '/node_modules']
   },
   plugins: [
       new webpack.ProvidePlugin({
@@ -44,5 +42,11 @@ module.exports = {
   ],
   node: {
     fs: "empty"
+  },
+  resolve: {
+      alias: {
+          api: CLIENT + '/api/development',
+          config: CLIENT + '/config/development'
+      }
   }
 }

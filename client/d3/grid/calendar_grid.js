@@ -141,7 +141,7 @@ class CalendarGridChart extends Chart{
           })
           .attr("width", function(d) { return grid_chart.grid_unit_size; })
           .attr('fill', grid_chart.color)
-          .attr("opacity", function(d) { return grid_chart.calculateOpacity(75, data.range);  });
+          .attr("opacity", function(d) { return grid_chart.calculateOpacity(grid_chart.rangeValue(d), data.range);  });
   }
 
   calculateOpacity(value, range){
