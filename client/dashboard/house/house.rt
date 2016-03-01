@@ -1,0 +1,49 @@
+<div id="house">
+  <h4>Select dataset:</h4>
+  <div class="btn-group" role="group">
+    <button
+      data-param="dataset"
+      data-value="energy"
+      rt-class="{active: this.energySelected()}"
+      onClick="{this.setParam.bind(this)}"
+      type="button" class="btn btn-primary">Daily Energy Statistics</button>
+    <button
+      data-param="dataset"
+      data-value="power"
+      rt-class="{active: this.powerSelected()}"
+      onClick="{this.setParam.bind(this)}"
+      type="button" class="btn btn-primary">15-minute Power Statistics</button>
+  </div>
+
+  <h4>View as:</h4>
+  <div class="btn-group" role="group">
+    <button
+      data-param="view"
+      data-value="graph"
+      rt-class="{active: this.graphSelected()}"
+      onClick="{this.setParam.bind(this)}"
+      type="button" class="btn btn-primary">Graph</button>
+    <button
+      data-param="view"
+      data-value="table"
+      rt-class="{active: this.tableSelected()}"
+      onClick="{this.setParam.bind(this)}"
+      type="button" class="btn btn-primary">Table</button>
+  </div>
+
+  <div rt-if="this.context.house">
+    <h4>Select dates:</h4>
+    <div class="btn-group">
+      <button
+        rt-repeat="year in this.context.house.years"
+        data-param="year"
+        data-value="{year}"
+        key="data-year-{year}"
+        class="btn-info btn btn-sm"
+        rt-class="{active: year == this.context.house.state.year}"
+        onClick="{this.setParam.bind(this)}">{year}</button>
+    </div>
+  </div><br/>
+
+  {this.props.children}
+</div>

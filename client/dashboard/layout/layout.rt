@@ -1,60 +1,11 @@
-<rt-require dependency="./../energy/energy" as="Energy"/>
-<rt-require dependency="./../power/power" as="Power"/>
 <div id="layout">
   <div class="alert alert-warning" rt-if="this.state.requesting_data">Retrieving houses...</div>
 
   <h4>Select household:</h4>
-  <select rt-if="this.state.houses" class="form-control" onChange="{this.setHouse}">
+  <select id="houses_select" rt-if="this.state.houses" class="form-control" onChange="{this.setHouse.bind(this)}" value="{this.props.params.house_id}">
     <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.scoped_id}">{house.data.name}</option>
   </select>
-  <button rt-if="this.state.house" onClick="{this.refreshData}" class="btn btn-xs btn-default">Refresh House Data</button>
+  <button rt-if="this.state.house" onClick="{this.refreshData.bind(this)}" class="btn btn-xs btn-default">Refresh House Data</button>
 
-  <h4>Select dataset:</h4>
-  <div class="btn-group" role="group">
-    <button
-      data-value="energy"
-      rt-class="{active: this.state.dataset === 'energy'}"
-      onClick="{this.setDataset}"
-      type="button" class="btn btn-primary">Daily Energy Statistics</button>
-    <button
-      data-value="power"
-      rt-class="{active: this.state.dataset === 'power'}"
-      onClick="{this.setDataset}"
-      type="button" class="btn btn-primary">15-minute Power Statistics</button>
-  </div>
-
-  <h4>View as:</h4>
-  <div class="btn-group" role="group">
-    <button
-      data-value="graph"
-      rt-class="{active: this.state.view === 'graph'}"
-      onClick="{this.setView}"
-      type="button" class="btn btn-primary">Graph</button>
-    <button
-      data-value="table"
-      rt-class="{active: this.state.view === 'table'}"
-      onClick="{this.setView}"
-      type="button" class="btn btn-primary">Table</button>
-  </div>
-
-  <h4>Select dates:</h4>
-  <div class="btn-group">
-    <button
-      rt-if="this.state.house"
-      rt-repeat="year in this.state.house.years"
-      data-value="{year}"
-      key="data-year-{year}"
-      class="btn-info btn btn-sm"
-      rt-class="{active: year == this.state.house.current_year}"
-      onClick="{this.setYear}">{year}</button>
-  </div><br/>
-
-  <Energy rt-if="this.state.house && this.state.dataset === 'energy'"
-    house="{this.state.house}"
-    view="{this.state.view}"
-    year="{this.state.year}"></Energy>
-  <Power rt-if="this.state.house && this.state.dataset === 'power'"
-    house="{this.state.house}"
-    view="{this.state.view}"
-    year="{this.state.year}"></Power>
+  {this.props.children}
 </div>

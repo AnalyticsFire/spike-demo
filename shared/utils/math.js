@@ -29,10 +29,4 @@ export default class {
     return minus;
   }
 
-  static inRange(n, min_max){
-    var min = min_max[0],
-      max = min_max[1];
-    return ((n >= min) && (n <= max));
-  }
-
 }

@@ -55,7 +55,7 @@ npm start
 
 When developing, it can be really useful to clear all of the data saved to local client storage. A better alternative to clearing all data in your browser cache, hit the 'Refresh Data' button on the main page below the houses dropdown.
 
-## Building the designer pack
+## Building the design pack
 
 To build a design pack, you first need to install [sass.js](https://github.com/medialize/sass.js/) in the design build directory so the design build can compile the sass in the browser.
 
@@ -64,7 +64,7 @@ cd client/build/design
 git clone https://github.com/medialize/sass.js.git
 ```
 
-Then to build the app, you'll need to build the app with webpack:
+Then build the app with webpack:
 
 ```sh
 gulp build --design
@@ -80,7 +80,7 @@ python -m SimpleHTTPServer 8000
 python3 -m http.server
 ```
 
-Access the app at localhost:8000. The app will run slow because json responses are not as finely paginated and both React templates and sass are compiled in the browser before the app runs.
+Access the app at localhost:8000. The app will run slowly because json responses are not as finely paginated and both React templates and sass are compiled in the browser before the app runs.
 
 The designer can change React templates and sass files in `/dashboard`. Refresh the page to see the changes reflected. They can then share this directory with us so we can update the files in this repository.
 

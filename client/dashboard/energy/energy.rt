@@ -1,39 +1,23 @@
 <div id="energy_view">
-  <div class="alert alert-warning" rt-if="this.state.loading_data">
-    Retrieving energy data for the {this.props.house.name} household...
+  <div class="alert alert-warning" rt-if="this.state.loading_energy_data">
+    Retrieving energy data...
   </div>
   <div rt-if="this.props.view === 'graph'">
     <h4>Select Data</h4>
     <div class="btn-group" role="group">
       <button
+        data-param="graph_attr"
         data-value="consumption"
         rt-class="{active: this.state.graph_attr === 'consumption'}"
-        onClick="{this.setGraphAttr}"
+        onClick="{this.setAttr}"
         type="button" class="btn btn-primary">Consumption</button>
       <button
+        data-param="graph_attr"
         data-value="production"
         rt-class="{active: this.state.graph_attr === 'production'}"
         onClick="{this.setGraphAttr}"
         type="button" class="btn btn-primary">Production</button>
     </div>
   </div>
-  <table class="table" rt-if="this.props.view === 'table'">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Day</th>
-        <th>Consumption (kWh)</th>
-        <th>Production (kWh)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr rt-repeat="energy_datum in this.props.house.energy_data" key="{energy_datum.scoped_id}">
-        <td></td>
-        <td>{energy_datum.day_to_s}</td>
-        <td>{energy_datum.consumption_to_s}</td>
-        <td>{energy_datum.production_to_s}</td>
-      </tr>
-    </tbody>
-  </table>
-  <div rt-if="this.props.view === 'graph'" id="energy_graph"></div>
+  {this.props.children}
 </div>

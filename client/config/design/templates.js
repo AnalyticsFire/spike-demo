@@ -11,11 +11,6 @@ const TEMPLATE_ROUTES = Object.freeze({
   power: 'dashboard/power/power.rt'
 });
 
-const COMPONENTS = {
-  Power: Power,
-  Energy: Energy
-};
-
 var TEMPLATES = {};
 
 class Templates {
@@ -40,16 +35,14 @@ class Templates {
       url: TEMPLATE_ROUTES[view]
     }).done((template)=>{
       var code = rt.convertTemplateToReact(template, {modules: 'none', name: view}),
-        context = {};
-      code = code.replace('var '+view+' = ', 'context.'+view+' = ');
+        eval_context = {};
+      code = code.replace('var ' + view + ' = ', 'eval_context.' + view + ' = ');
       new Function('with(this){ ' + code + ' } ').call({
-        Energy: Energy,
-        Power: Power,
-        context: context,
+        eval_context: eval_context,
         '_': _,
         'React': React
       });
-      TEMPLATES[view] = context[view];
+      TEMPLATES[view] = eval_context[view];
       fnResolve();
     });
   }

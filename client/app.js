@@ -1,13 +1,14 @@
 import 'babel-polyfill';
 import 'bootstrap/dist/js/bootstrap.min';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Layout from './dashboard/layout/layout';
+import {Router} from 'react-router';
 
-export default function(){
+import {ROUTES} from './dashboard/routes';
+
+export default function(history){
   ReactDOM.render(
-    React.createElement(Layout),
+    React.createElement(Router, {routes: ROUTES, history: history}),
     document.getElementById('root')
   );
 };

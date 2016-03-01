@@ -64,5 +64,11 @@ class DateRange {
     return new Date(date.getTime() + s);
   }
 
+  static inRange(n, min_max){
+    var min = min_max[0],
+      max = min_max[1];
+    return ((n >= min) && (n <= max));
+  }
+
 }
 export default DateRange;

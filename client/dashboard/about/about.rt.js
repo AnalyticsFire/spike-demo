@@ -1,0 +1,5 @@
+import React from 'react';
+import _ from 'lodash';
+export default function () {
+    return React.createElement('div', { 'id': 'about' }, React.createElement('div', { 'className': 'panel panel-default' }, React.createElement('div', { 'className': 'panel-heading' }, 'About'), React.createElement('div', { 'className': 'panel-body' }, React.createElement('p', {}, 'This is a Spike bundle prototype using the following lirbaries:'), React.createElement('ul', {}, React.createElement('li', {}, 'React'), React.createElement('li', {}, 'React Templates'), React.createElement('li', {}, 'React Router'), React.createElement('li', {}, 'LokiJs - persisting API calls to indexedDb'), React.createElement('li', {}, 'Webpack - hot mode developing and app bundling'), React.createElement('li', {}, 'Babel - ES6 transpiler')), React.createElement('p', {}, 'The demo app consists of a dataset of 10 houses and 10 years of randomly generated power consumption and production at 15 minute intervals. You can toggle between different houses and time periods to compare and contrast the dataset.'), React.createElement('p', {}, 'Select a house below to get started.'))));
+};

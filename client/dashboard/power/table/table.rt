@@ -1,0 +1,18 @@
+<table class="table" rt-if="this.context.house">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Time</th>
+      <th>Consumption (W)</th>
+      <th>Production (W)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr rt-repeat="power_datum in this.context.house.power_data" key="{power_datum.scoped_id}">
+      <td></td>
+      <td>{power_datum.time_to_s}</td>
+      <td>{power_datum.consumption_to_s}</td>
+      <td>{power_datum.production_to_s}</td>
+    </tr>
+  </tbody>
+</table>

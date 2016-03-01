@@ -20,6 +20,7 @@ class House {
   constructor(data){
     var house = this;
     house.data = data;
+    house.state = {};
     Object.assign(house, Databasable);
 
     var n_years = house.data_until_moment.year() - house.data_from_moment.year() + 1;
@@ -27,9 +28,10 @@ class House {
     for (var year=house.data_from_moment.year(); year<=house.data_until_moment.year(); year+=1){
       house.years.push(year);
     }
-    house.current_month = house.data_until_moment.format('MMM');
-    house.current_year = house.data_until_moment.year();
-    house.setCurrentMonthMoment();
+    house.setMonthState({
+      month: house.data_until_moment.format('MMM'),
+      year: house.data_until_moment.year()
+    });
   }
 
   get data_from_moment(){
@@ -42,20 +44,19 @@ class House {
     return moment.tz(house.data.data_until * 1000, house.data.timezone);
   }
 
-  get end_of_current_data_moment(){
-    var house = this,
-      end_of_month = house.current_month_moment.clone().endOf('month');
-    return end_of_month > house.data_until_moment ? house.data_until_moment : end_of_month;
-  }
-
   get scoped_id(){
     return `house-${this.data.id}`;
+  }
+
+  get select_props(){
+    if (this.selected) return {selected: true};
+    else return {};
   }
 
   availableMonths(){
     var  house = this,
       all_months = moment.monthsShort(),
-      year = house.current_year.toString();
+      year = house.state.year.toString();
     if ((year) === house.data_from_moment.format('YYYY')){
       return all_months.slice(house.data_from_moment.month(), 12);
     } else if (year === house.data_until_moment.format('YYYY')){
@@ -65,29 +66,76 @@ class House {
     }
   }
 
-  setYear(year){
-    var house = this;
-    house.current_year = year;
-    return house.setCurrentMonthMoment();
-  }
-
-  setMonth(month){
-    var house = this;
-    house.current_month = month;
-    return house.setCurrentMonthMoment();
-  }
-
-  setCurrentMonthMoment(){
+  setMonthState(params, power_ranges){
     var house = this,
-      month_i = moment.monthsShort().indexOf(house.current_month),
-      new_month_moment = moment.tz({year: house.current_year, month: month_i, day: 1}, house.data.timezone).startOf('month');
-    if (!house.current_month_moment || new_month_moment.unix() !== house.current_month_moment.unix()){
-      house.current_month_moment = new_month_moment;
-      house.power_date_range = [house.end_of_current_data_moment.clone().subtract(4, 'days').unix(), house.end_of_current_data_moment.unix()];
-      house.energy_date_range = [house.end_of_current_data_moment.clone().startOf('year').unix(), house.end_of_current_data_moment.clone().endOf('year').unix()]
-      return true;
+      all_months = moment.monthsShort();
+
+    if (house.state.month !== params.month || house.state.year != params.year){
+      var new_year = +params.year;
+      if (new_year >= house.data_from_moment.year() && new_year <= house.data_until_moment.year()){
+        house.state.year = params.year;
+      } else if (!house.state.year){
+        house.state.year = house.years[house.years.length - 1];
+      }
+      var available_months = house.availableMonths();
+      if (available_months.indexOf(params.month) >= 0){
+        house.state.month = params.month;
+      } else if (!house.state.month || available_months.indexOf(house.state.month) < 0){
+        house.state.month = available_months[available_months.length - 1];
+      }
     }
-    return false;
+
+    var month_i = all_months.indexOf(house.state.month),
+      new_month_moment = moment.tz({year: house.state.year, month: month_i, day: 1}, house.data.timezone).startOf('month');
+    if (!house.state.current_month_moment || new_month_moment.unix() !== house.state.current_month_moment.unix()){
+      house.state.current_month_moment = new_month_moment;
+    }
+    house.setDataRanges(power_ranges);
+  }
+
+  setDataRanges(power_ranges){
+    var house = this,
+        end_of_month = house.state.current_month_moment.clone().endOf('month'),
+        end_of_current_data_moment = end_of_month > house.data_until_moment ? house.data_until_moment : end_of_month,
+        energy_max = Math.min(end_of_current_data_moment.clone().endOf('year').unix(), house.data.data_until);
+    house.state.energy_range = [end_of_current_data_moment.clone().startOf('year').unix(), energy_max];
+    house.state.power_range = house.state.power_range || [];
+    house.state.end_of_current_data_moment = end_of_current_data_moment;
+
+    var current_data_range = [house.state.current_month_moment.unix(), end_of_current_data_moment.unix()],
+      power_min = house.state.power_range[0],
+      power_max = house.state.power_range[1];
+    if (power_ranges){
+      if (DateRange.inRange(power_ranges[1], current_data_range)){
+        power_max = power_ranges[1];
+      }
+      if (DateRange.inRange(power_ranges[0], current_data_range) && power_ranges[0] < power_max){
+        power_min = power_ranges[0];
+      }
+    }
+    if (!power_max || !DateRange.inRange(power_max, current_data_range)){
+      power_max = end_of_current_data_moment.unix();
+    }
+    if (!power_min || !DateRange.inRange(power_min, current_data_range) ||
+      power_max - power_min > 3600 * 24 * 4){
+      power_min = power_max - 3600 * 24 * 4;
+    }
+    house.state.power_range = [power_min, power_max];
+  }
+
+  matchesYearState(params){
+    var house = this;
+    return params.year == house.state.year;
+  }
+
+  matchesMonthState(params){
+    var house = this;
+    return params.month == house.state.month && params.year == house.state.year;
+  }
+
+  matchesPowerRange(dates){
+    var house = this;
+    return house.state.power_range[0] == dates[0] && house.state.power_range[1] == dates[1];
   }
 
   offset_diff(unix){
@@ -121,7 +169,7 @@ class House {
       .then((power_collection)=>{
         return house.ensurePowerData()
           .then(()=>{
-            var params = house.rangeToLokiParams('time', house.power_date_range);
+            var params = house.rangeToLokiParams('time', house.state.power_range);
             house.power_data = power_collection.find(params)
                   .sort((pd1, pd2)=>{
                     if (pd1.time === pd2.time) return 0;
@@ -137,7 +185,7 @@ class House {
     var house = this,
       query_ranges;
 
-    query_ranges = DateRange.addRange(house.power_date_range, house.data.power_datum_ranges || []);
+    query_ranges = DateRange.addRange(house.state.power_range, house.data.power_datum_ranges || []);
     if (query_ranges.gaps_filled.length > 0){
       var params = {dates: query_ranges.gaps_filled};
       return house.getPowerData(params)
@@ -167,7 +215,7 @@ class House {
       .then((energy_collection)=>{
         return house.ensureEnergyData()
           .then(()=>{
-            var params = house.rangeToLokiParams('day', house.energy_date_range);
+            var params = house.rangeToLokiParams('day', house.state.energy_range);
             house.energy_data = energy_collection.find(params)
                   .sort((pd1, pd2)=>{
                     if (pd1.day === pd2.day) return 0;
@@ -181,7 +229,7 @@ class House {
 
   ensureEnergyData(){
     var house = this,
-      query_ranges = DateRange.addRange(house.energy_date_range, house.data.energy_datum_ranges || []);
+      query_ranges = DateRange.addRange(house.state.energy_range, house.data.energy_datum_ranges || []);
     if (query_ranges.gaps_filled.length > 0){
       return house.getEnergyData({dates: query_ranges.gaps_filled})
         .then(()=>{
