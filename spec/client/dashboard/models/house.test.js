@@ -3,7 +3,6 @@
 import moment from 'moment-timezone';
 import House from './../../../../client/models/house.js';
 
-
 describe('house#setMonthState', ()=>{
 
   var data_until = 1456589922, // Sat, 27 Feb 2016 16:18:42 +0000

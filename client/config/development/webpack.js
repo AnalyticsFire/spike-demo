@@ -23,6 +23,9 @@ module.exports = {
           }, {
             test: /\.json$/,
             loader: 'json'
+          }, {
+            test: /\.rt/,
+            loader: "react-templates-loader"
           }
       ]
   },

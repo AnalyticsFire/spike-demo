@@ -3,15 +3,15 @@
 
 import fs from 'fs';
 
-import aboutRt from './../../dashboard/about/about.rt.js';
-import houseRt from './../../dashboard/house/house.rt.js';
-import layoutRt from './../../dashboard/layout/layout.rt.js';
-import energyRt from './../../dashboard/energy/energy.rt.js';
-import energyGraphRt from './../../dashboard/energy/graph/graph.rt.js';
-import energyTableRt from './../../dashboard/energy/table/table.rt.js';
-import powerRt from './../../dashboard/power/power.rt.js';
-import powerGraphRt from './../../dashboard/power/graph/graph.rt.js';
-import powerTableRt from './../../dashboard/power/table/table.rt.js';
+import aboutRt from './../../dashboard/about/about.rt';
+import houseRt from './../../dashboard/house/house.rt';
+import layoutRt from './../../dashboard/layout/layout.rt';
+import energyRt from './../../dashboard/energy/energy.rt';
+import energyGraphRt from './../../dashboard/energy/graph/graph.rt';
+import energyTableRt from './../../dashboard/energy/table/table.rt';
+import powerRt from './../../dashboard/power/power.rt';
+import powerGraphRt from './../../dashboard/power/graph/graph.rt';
+import powerTableRt from './../../dashboard/power/table/table.rt';
 
 const TEMPLATES = {
   about: aboutRt,

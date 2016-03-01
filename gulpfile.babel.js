@@ -7,7 +7,6 @@ import FsHelper from './server/lib/fs_helper';
 import ComponentMapWriter from './server/lib/tasks/component_map_writer';
 import DB from './server/config/database';
 import {PowerDataSeed, HouseSeed} from './server/lib/tasks/seed_data';
-import rtCompile from './server/lib/tasks/react_template_compile';
 
 gulp.task('generate_power_csv', function(done){
   DB.sync().then(()=>{
@@ -25,16 +24,6 @@ gulp.task('save_house_csv', function(done){
   DB.sync().then(()=>{
     HouseSeed.saveCsv(yargs.argv, done);
   });
-});
-
-gulp.task('compile_react_templates', function() {
-    gulp.src('./client/dashboard/**/*.rt')
-        .pipe(rtCompile({
-          modules: 'es6',
-          targetVersion: '0.14.0',
-          suffix: '.rt'
-        }))
-        .pipe(gulp.dest('./client/dashboard'));
 });
 
 // right now, build only available for design.
