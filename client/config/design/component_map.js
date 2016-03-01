@@ -1,0 +1,1 @@
+export const COMPONENT_MAP = {"about":"dashboard/about/about","energy":"dashboard/energy/energy","energy_graph":"dashboard/energy/graph/graph","energy_table":"dashboard/energy/table/table","house":"dashboard/house/house","layout":"dashboard/layout/layout","power_graph":"dashboard/power/graph/graph","power":"dashboard/power/power","power_table":"dashboard/power/table/table"}

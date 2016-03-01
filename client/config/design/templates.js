@@ -2,14 +2,7 @@ import rt from 'react-templates';
 import React from 'react';
 import _ from 'lodash';
 
-import Energy from './../../dashboard/energy/energy';
-import Power from './../../dashboard/power/power';
-
-const TEMPLATE_ROUTES = Object.freeze({
-  energy: 'dashboard/energy/energy.rt',
-  layout: 'dashboard/layout/layout.rt',
-  power: 'dashboard/power/power.rt'
-});
+import {COMPONENT_MAP} from './component_map';
 
 var TEMPLATES = {};
 
@@ -17,32 +10,32 @@ class Templates {
 
   static sync(){
     var all = [];
-    for (var view in TEMPLATE_ROUTES){
+    for (var component_name in COMPONENT_MAP){
       var done = new Promise((fnResolve, fnReject)=>{
-          Templates.evalTemplate(view, fnResolve);
+        Templates.evalTemplate(component_name, fnResolve);
       });
       all.push(done);
     }
     return Promise.all(all);
   }
 
-  static forComponent(view){
-    return TEMPLATES[view];
+  static forComponent(name){
+    return TEMPLATES[name];
   }
 
-  static evalTemplate(view, fnResolve){
+  static evalTemplate(component_name, fnResolve){
     jQuery.ajax({
-      url: TEMPLATE_ROUTES[view]
+      url: COMPONENT_MAP[component_name] + '.rt'
     }).done((template)=>{
-      var code = rt.convertTemplateToReact(template, {modules: 'none', name: view}),
+      var code = rt.convertTemplateToReact(template, {modules: 'none', name: component_name}),
         eval_context = {};
-      code = code.replace('var ' + view + ' = ', 'eval_context.' + view + ' = ');
+      code = code.replace('var ' + component_name + ' = ', 'eval_context.' + component_name + ' = ');
       new Function('with(this){ ' + code + ' } ').call({
         eval_context: eval_context,
         '_': _,
         'React': React
       });
-      TEMPLATES[view] = eval_context[view];
+      TEMPLATES[component_name] = eval_context[component_name];
       fnResolve();
     });
   }

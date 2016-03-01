@@ -1,4 +1,4 @@
-<table class="table" rt-if="this.context.house">
+<table id="power_table" class="table" rt-if="this.context.house">
   <thead>
     <tr>
       <th></th>

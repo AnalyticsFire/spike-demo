@@ -1,16 +1,11 @@
-const STYLE_ROUTES = Object.freeze({
-  energy: 'dashboard/energy/energy.scss',
-  layout: 'dashboard/layout/layout.scss',
-  power: 'dashboard/power/power.scss',
-  app: 'dashboard/app.scss'
-});
+import {COMPONENT_MAP} from './component_map';
 
 class Styles {
 
   static sync(){
     var all = [],
       css = '';
-    for (var view in STYLE_ROUTES){
+    for (var view in COMPONENT_MAP){
       var done = new Promise((fnResolve, fnReject)=>{
         Styles.addCss(view, fnResolve)
       }).then((result)=>{
@@ -26,7 +21,7 @@ class Styles {
 
   static addCss(view, fnResolve){
     return jQuery.ajax({
-      url: STYLE_ROUTES[view]
+      url: COMPONENT_MAP[view] + '.scss'
     }).then((scss)=>{
       var sass = new Sass();
       if (!scss) return fnResolve("");
