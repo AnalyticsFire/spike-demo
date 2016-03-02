@@ -12,36 +12,43 @@ class PowerComponent extends React.Component {
   constructor(props){
     super(props);
     var power = this;
-    power.state = {
-      loading_power_data: true };
     power.updates = 0;
+  }
+
+  get house(){
+    console.log('PowerComponent#get house', this.props.location.state && this.props.location.state.house)
+    return this.props.location.state && this.props.location.state.house;
   }
 
   componentDidMount(){
     var power = this,
-      house = power.context.house;
+      house = power.props.location.state.house;
+
+    console.log(this.updates, ') PowerComponent#componentDidMount')
+    console.log(this.house)
     power.renders = 0;
     if (!house) return false;
     power.initDateRange();
-    house.setPowerData()
-      .then(()=>{
-        power.setState({loading_power_data: false }); });
   }
 
   componentDidUpdate(prev_props, prev_state, prev_context){
+    this.updates += 1
+    console.log(this.updates, ') PowerComponent#componentDidUpdate')
+    console.log(this.house)
     var power = this,
-      house = power.context.house;
-    if (!house) return false;
-    var route_helper = new RouteHelper(house, power.props);
-    if ((!prev_context.house || prev_context.house.data.id != power.context.house.data.id) ||
-                                !house.matchesPowerRange(prev_props.location.query['dates[]'] || [])) {
-      power.setState({loading_power_data: true});
-      house.setPowerData()
-        .then(()=>{
-          power.initDateRange();
-          power.setState({loading_power_data: false}); // will update graph or table.
-        });
-    } else if (!house.matchesMonthState(prev_props.params)) power.initDateRange();
+      route_helper = new RouteHelper(power.props);
+    if (!route_helper.house) return false;
+    if (power.shouldInitDateRange(prev_props)) {
+      power.initDateRange();
+    }
+  }
+
+  shouldInitDateRange(prev_props){
+    var power = this,
+      route_helper = new RouteHelper(power.props);
+    return !prev_props.location.state.house ||
+              prev_props.location.state.house.data.id != power.context.house.data.id ||
+              !route_helper.house.matchesPowerRange(prev_props.params, prev_props.location.query['dates[]'] || []);
   }
 
   initDateRange(){
@@ -69,8 +76,7 @@ class PowerComponent extends React.Component {
         var power_range = [Math.round(min.getTime() / 1000), Math.round(max.getTime() / 1000)],
           route_helper = new RouteHelper(house, power.props, {power_range: power_range});
 
-        route_helper.updateHouseState();
-        power.context.router.push(route_helper.newRoute());
+        route_helper.updateRoute();
       }, 500);
     };
     power.date_range_slider.drawData({
@@ -95,25 +101,13 @@ class PowerComponent extends React.Component {
     }
   }
 
-  getChildContext(){
-    var layout = this;
-    return {
-      loading_power_data: layout.state.loading_power_data
-    };
-  }
-
   render() {
     var powerRt = Templates.forComponent('power');
     return powerRt.call(this);
   }
 }
 
-PowerComponent.childContextTypes = {
-  loading_power_data: React.PropTypes.bool.isRequired
-};
-
 PowerComponent.contextTypes = {
-  house: React.PropTypes.instanceOf(House),
   router: React.PropTypes.object.isRequired
 };
 

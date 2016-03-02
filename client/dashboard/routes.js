@@ -42,11 +42,17 @@ export const ROUTES = [{
 
 export class RouteHelper {
 
-  constructor(house, props, update){
+  constructor(router, props, update){
+    update = update || {};
     var route_helper = this;
-    route_helper.house = house;
     route_helper.props = props;
+    route_helper.router = router;
     route_helper.update = update || {};
+  }
+
+  get house(){
+    var route_helper = this;
+    return route_helper.update.house || route_helper.props.location.state && route_helper.props.location.state.house;
   }
 
   get view(){
@@ -65,8 +71,13 @@ export class RouteHelper {
   }
 
   get power_range(){
-    var route_helper = this;
-    return route_helper.update.power_range || route_helper.props.location.query['dates[]'];
+    var route_helper = this,
+    range = route_helper.update.power_range || route_helper.props.location.query.dates;
+    if (range) {
+      range[0] = +range[0];
+      range[1] = +range[1];
+    }
+    return range;
   }
 
   get date_params(){
@@ -76,11 +87,22 @@ export class RouteHelper {
       year: route_helper.update.year || route_helper.house.year };
   }
 
+  get new_state(){
+    var route_helper = this;
+    return Object.keys(route_helper.update).reduce((state, key)=>{
+      if (['house'].indexOf(key) >= 0) state[key] = route_helper.update[key];
+      return state;
+    }, {});
+  }
+
+
+  // compare house state to updates or params.
   routeUpdated(){
     var route_helper = this,
       house = route_helper.house;
     return (route_helper.energySelected() && !house.matchesYearState(route_helper.date_params)) ||
-            (route_helper.powerSelected() && !house.matchesMonthState(route_helper.date_params) || !house.matchesPowerRange(route_helper.power_range));
+            (route_helper.powerSelected() && !house.matchesMonthState(route_helper.date_params) || !house.matchesPowerRange(route_helper.power_range)) &&
+            (!route_helper.update.view || route_helper.update.view !== route_helper.view);
   }
 
   // This will update the house state acccording to passed update parameters.
@@ -88,24 +110,25 @@ export class RouteHelper {
     var route_helper = this,
       house = route_helper.house;
     house.setMonthState(route_helper.date_params, route_helper.update.power_range);
+    if (route_helper.energySelected()){
+      route_helper.router.push({state: {loading_energy_data: true}})
+      return house.setEnergyData().then(()=>{ return {loading_energy_data: false} });
+    } else if (route_helper.powerSelected()) {
+      route_helper.router.push({state: {loading_power_data: true}})
+      return house.setPowerData().then(()=>{ return {loading_power_data: false} });
+    } else return Promise.resolve({});
   }
 
-  paramsHaveDateState(){
+  updateRoute(){
     var route_helper = this;
-    return !!route_helper.props.params.year;
-  }
-
-  // This will update the house according to URL parameters.
-  updateHouseToParams(){
-    var route_helper = this,
-      house = route_helper.house,
-      power_range;
-    if (route_helper.props.location.query['dates[]']){
-      power_range = [];
-      power_range[0] = +route_helper.props.location.query['dates[]'][0];
-      power_range[1] = +route_helper.props.location.query['dates[]'][1];
-    }
-    house.setMonthState(route_helper.props.params, power_range);
+    return route_helper.updateHouseState()
+      .then((data_state)=>{
+        route_helper.router.push({
+          pathname: route_helper.newRoute(),
+          query: route_helper.newQuery(),
+          state: Object.assign(data_state, route_helper.new_state)
+        });
+      });
   }
 
   // should be run AFTER updateHouseState is called.
@@ -115,8 +138,14 @@ export class RouteHelper {
     if (route_helper.dataset === 'energy'){
       return `/houses/${house.data.id}/energy/${house.state.year}/${route_helper.graph_attr}/${route_helper.view}`;
     } else {
-      return `/houses/${house.data.id}/power/${house.state.month}/${house.state.year}/${route_helper.view}?${jQuery.param({dates: house.state.power_range})}`;
+      return `/houses/${house.data.id}/power/${house.state.month}/${house.state.year}/${route_helper.view}`;
     }
+  }
+
+  newQuery(){
+    var route_helper = this;
+    if (route_helper.dataset === 'power') return {dates: route_helper.house.state.power_range};
+    else return {};
   }
 
   graphSelected(){

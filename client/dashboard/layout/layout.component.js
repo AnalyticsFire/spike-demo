@@ -12,8 +12,13 @@ class LayoutComponent extends React.Component {
     this.state = {
       houses: null,
       house: null,
-      requesting_data: true
+      loading_house_data: true
     };
+    this.updates = 0
+  }
+
+  get house(){
+    return this.props.location.state && this.props.location.state.house;
   }
 
   componentDidMount() {
@@ -22,30 +27,34 @@ class LayoutComponent extends React.Component {
       var house = null;
       if (layout.props.params.house_id != undefined){
         house = houses.find((h)=>{ return h.data.id == layout.props.params.house_id; });
-        var route_helper = new RouteHelper(house, layout.props);
-        if (route_helper.paramsHaveDateState()) route_helper.updateHouseToParams();
       }
       layout.setState({
         houses: houses,
-        requesting_data: false,
-        house: house });
+        loading_house_data: false
+        }, ()=>{
+          if (house){
+            var route_helper = new RouteHelper(layout.context.router, layout.props, {house: house});
+            route_helper.updateRoute();
+          }
+        });
     });
+  }
+
+  componentDidUpdate(){
+    var layout = this;
+
+    this.updates += 1;
+    console.log(this.updates, ') LayoutComponent#componentDidUpdate');
   }
 
   setHouse(event){
     var layout = this,
-      house_id = event.target.value,
-      old_house = layout.state.house,
-      house = layout.state.houses.find((house)=>{ return house.data.id == house_id });
-    if (!old_house || old_house.id != house_id){
-      var route_helper = new RouteHelper(house, layout.props);
-      route_helper.updateHouseToParams();
-      layout.setState({house: house}, ()=>{
-        if (layout.renders < 10){
-          layout.context.router.push(route_helper.newRoute());
-          layout.renders += 1
-        }
-        if (old_house) old_house.closeDb();
+      house_id = event.target.value;
+    if (!layout.house || layout.house.id != house_id){
+      House.ensureHouses().then((houses)=>{
+        var new_house = houses.find((h)=>{ return h.data.id == house_id }),
+          route_helper = new RouteHelper(layout.context.router, layout.props, {house: new_house});
+        route_helper.updateRoute();
       });
     }
   }
@@ -63,11 +72,6 @@ class LayoutComponent extends React.Component {
       });
   }
 
-  getChildContext(){
-    var layout = this;
-    return {house: layout.state.house};
-  }
-
   render() {
     var layoutRt = Templates.forComponent('layout');
     return layoutRt.call(this);
@@ -78,7 +82,4 @@ LayoutComponent.contextTypes = {
   router: React.PropTypes.object.isRequired
 };
 
-LayoutComponent.childContextTypes = {
-  house: React.PropTypes.instanceOf(House)
-};
 export default LayoutComponent;

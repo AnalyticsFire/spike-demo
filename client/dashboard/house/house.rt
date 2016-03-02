@@ -31,16 +31,16 @@
       type="button" class="btn btn-primary">Table</button>
   </div>
 
-  <div rt-if="this.context.house">
+  <div rt-if="this.house">
     <h4>Select dates:</h4>
     <div class="btn-group">
       <button
-        rt-repeat="year in this.context.house.years"
+        rt-repeat="year in this.house.years"
         data-param="year"
         data-value="{year}"
         key="data-year-{year}"
         class="btn-info btn btn-sm"
-        rt-class="{active: year == this.context.house.state.year}"
+        rt-class="{active: year == this.house.state.year}"
         onClick="{this.setParam.bind(this)}">{year}</button>
     </div>
   </div><br/>

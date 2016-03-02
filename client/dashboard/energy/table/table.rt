@@ -1,4 +1,4 @@
-<table id="energy_table" rt-if="this.context.house" class="table">
+<table id="energy_table" rt-if="this.house" class="table">
   <thead>
     <tr>
       <th></th>
@@ -8,7 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr rt-repeat="energy_datum in this.context.house.energy_data" key="{energy_datum.scoped_id}">
+    <tr rt-repeat="energy_datum in this.house.energy_data" key="{energy_datum.scoped_id}">
       <td></td>
       <td>{energy_datum.day_to_s}</td>
       <td>{energy_datum.consumption_to_s}</td>

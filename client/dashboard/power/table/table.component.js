@@ -12,7 +12,6 @@ class TableComponent extends React.Component {
 }
 
 TableComponent.contextTypes = {
-  house: React.PropTypes.instanceOf(House),
   router: React.PropTypes.object.isRequired
 };
 

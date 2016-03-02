@@ -133,9 +133,9 @@ class House {
     return params.month == house.state.month && params.year == house.state.year;
   }
 
-  matchesPowerRange(dates){
+  matchesPowerRange(params, dates){
     var house = this;
-    return house.state.power_range[0] == dates[0] && house.state.power_range[1] == dates[1];
+    return house.matchesMonthState(params) && house.state.power_range[0] == dates[0] && house.state.power_range[1] == dates[1];
   }
 
   offset_diff(unix){

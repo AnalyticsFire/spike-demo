@@ -1,5 +1,5 @@
 <div id="energy_view">
-  <div class="alert alert-warning" rt-if="this.state.loading_energy_data">
+  <div class="alert alert-warning" rt-if="this.props.location.state.loading_energy_data">
     Retrieving energy data...
   </div>
   <div rt-if="this.props.view === 'graph'">
@@ -8,13 +8,13 @@
       <button
         data-param="graph_attr"
         data-value="consumption"
-        rt-class="{active: this.state.graph_attr === 'consumption'}"
+        rt-class="{active: this.props.params.graph_attr === 'consumption'}"
         onClick="{this.setAttr}"
         type="button" class="btn btn-primary">Consumption</button>
       <button
         data-param="graph_attr"
         data-value="production"
-        rt-class="{active: this.state.graph_attr === 'production'}"
+        rt-class="{active: this.props.params.graph_attr === 'production'}"
         onClick="{this.setGraphAttr}"
         type="button" class="btn btn-primary">Production</button>
     </div>

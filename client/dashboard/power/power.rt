@@ -1,16 +1,16 @@
 <div id="power_view">
   <div class="btn-group">
     <button
-      rt-if="this.context.house"
-      rt-repeat="month in this.context.house.availableMonths()"
+      rt-if="this.house"
+      rt-repeat="month in this.house.availableMonths()"
       data-param="month"
       data-value="{month}"
       key="data-month-{month}"
       class="btn-warning btn btn-sm"
-      rt-class="{active: month === this.context.house.state.month}"
+      rt-class="{active: month === this.house.state.month}"
       onClick="{this.setParam.bind(this)}">{month}</button>
   </div>
-  <div class="alert alert-warning" rt-if="this.state.loading_power_data">
+  <div class="alert alert-warning" rt-if="this.props.location.state.loading_power_data">
     Retrieving power data...
   </div>
   <div id="power_date_setter"></div>

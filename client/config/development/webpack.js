@@ -25,7 +25,7 @@ module.exports = {
             loader: 'json'
           }, {
             test: /\.rt/,
-            loader: "react-templates-loader"
+            loader: "react-templates-loader?targetVersion=0.14.0"
           }
       ]
   },

@@ -7,21 +7,26 @@ import SplineStackChart from './../../../d3/line/spline_stack';
 class GraphComponent extends React.Component {
 
   componentDidMount(){
-    var power_graph = this,
-      house = power_graph.context.house;
+    var power_graph = this;
     power_graph.graph_title = ' ';
-    if (!power_graph.context.loading_power_data) power_graph.updateGraph();
+    if (power_graph.house) power_graph.updateGraph();
+  }
+
+  get house(){
+    return this.props.location.state && this.props.location.state.house;
   }
 
   componentDidUpdate(prev_props, prev_state, prev_context){
-    var power_graph = this,
-      house = power_graph.context.house;
-    if (power_graph.context.loading_power_data) {return false;}
-    if (!prev_context.house ||
-        prev_context.loading_power_data ||
-        prev_context.house.id != power_graph.context.house.id) {
+    var power_graph = this;
+    if (power_graph.shouldUpdateGraph(prev_props)) {
       power_graph.updateGraph();
     }
+  }
+
+  shouldUpdateGraph(prev_props){
+    var power_graph = this;
+    return (power_graph.house && !prev_props.location.state.house ||
+        prev_props.location.state.house.id != power_graph.props.location.state.house.id);
   }
 
   updateGraph(){
@@ -83,8 +88,6 @@ class GraphComponent extends React.Component {
 }
 
 GraphComponent.contextTypes = {
-  house: React.PropTypes.instanceOf(House),
-  loading_power_data: React.PropTypes.bool.isRequired,
   router: React.PropTypes.object.isRequired
 };
 

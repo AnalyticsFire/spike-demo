@@ -62,20 +62,9 @@ import logger from 'morgan';
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 
-// serve fonts in /assets/fonts
-import assets from "connect-assets";
-
 // TODO: These routes need to match references in the bootstrap and font awesome files.
 app.use("/assets/fonts", express.static("bootstrap/dist/fonts"));
 app.use("/assets/fonts", express.static("font-awesome/fonts"));
-// serve compiled vendor assets and application.css.
-app.use(assets({
-  paths: ["./../node_modules"],
-  build: true,
-  buildDir: false,
-  // compile: false,
-  compress: true
-}));
 // serve public static files.
 dev_server.app.use('/', express.static(path.resolve(__dirname, 'public')));
 

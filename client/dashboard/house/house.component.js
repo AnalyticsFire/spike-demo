@@ -10,23 +10,26 @@ class HouseComponent extends React.Component {
   constructor(props){
     super(props);
     this.renders = 0;
+    this.updates = 0;
+  }
+
+  get house(){
+    return this.props.location.state && this.props.location.state.house;
   }
 
   setParam(event){
     var house_component = this,
-      house = house_component.context.house,
       param = event.target.dataset.param,
       value = event.target.dataset.value,
       update = {}, route_helper;
     update[param] = value;
-    route_helper = new RouteHelper(house, house_component.props, update);
-    if (route_helper.routeUpdated()){
-      route_helper.updateHouseState();
-      if (house_component.renders < 10){
-        house_component.context.router.push(route_helper.newRoute());
-        house_component.renders += 1;
-      }
-    }
+    route_helper = new RouteHelper(house_component.props, update);
+    if (route_helper.routeUpdated()) route_helper.updateRoute();
+  }
+
+  componentDidUpdate(){
+    this.updates += 1;
+    console.log(this.updates, ') HouseComponent#componentDidUpdate');
   }
 
   graphSelected(){
@@ -57,7 +60,6 @@ class HouseComponent extends React.Component {
 };
 
 HouseComponent.contextTypes = {
-  house: React.PropTypes.instanceOf(House),
   router: React.PropTypes.object.isRequired
 };
 

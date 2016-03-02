@@ -7,26 +7,27 @@ import House from './../../../models/house';
 class GraphComponent extends React.Component {
 
   componentDidMount(){
-    var energy_graph = this,
-      house = energy_graph.context.house;
-    if (!energy_graph.context.loading_energy_data) energy_graph.updateGraph();
+    var energy_graph = this;
+    if (energy_graph.house) energy_graph.updateGraph();
+  }
+
+  get house(){
+    return this.props.location.state && this.props.location.state.house;
   }
 
   componentDidUpdate(prev_props, prev_state, prev_context){
-    var energy_graph = this,
-      house = energy_graph.context.house;
-    if (energy_graph.context.loading_energy_data) {return false;}
-    if (!prev_context.house ||
-        prev_context.loading_energy_data ||
-        prev_context.house.id != energy_graph.context.house.id) {
-      energy_graph.updateGraph();
-    }
+    var energy_graph = this;
+    if (energy_graph.shouldUpdateGraph(prev_props)) { energy_graph.updateGraph(); }
   }
 
+  shouldUpdateGraph(prev_props){
+    var energy_graph = this;
+    return energy_graph.house && !prev_props.location.state.house ||
+        prev_props.location.state.house.id != energy_graph.house.id;
+  }
 
   updateGraph(){
     var energy_graph = this,
-      house = energy_graph.context.house,
       graph_attr = energy_graph.props.params.graph_attr;
 
     if (energy_graph.graph === undefined){
@@ -56,7 +57,7 @@ class GraphComponent extends React.Component {
       css_class: '',
       min_range: 0,
       max_range: 150,
-      values: house.energy_data
+      values: energy_graph.house.energy_data
     });
   }
 
@@ -68,8 +69,6 @@ class GraphComponent extends React.Component {
 }
 
 GraphComponent.contextTypes = {
-  house: React.PropTypes.instanceOf(House),
-  loading_energy_data: React.PropTypes.bool.isRequired,
   router: React.PropTypes.object.isRequired
 };
 
