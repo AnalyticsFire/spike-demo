@@ -52,8 +52,9 @@ describe('house#setMonthState', ()=>{
 
     house.setMonthState({
       month: 'Mar',
-      year: 2015
-    }, [ power_min, power_max ]);
+      year: 2015,
+      power_range: [ power_min, power_max ]
+    });
 
     expect(house.state.month).toEqual('Mar');
     expect(house.state.year).toEqual(2015);
