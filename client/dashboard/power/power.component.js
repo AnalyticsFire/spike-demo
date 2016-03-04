@@ -5,55 +5,54 @@ import _ from 'lodash';
 import Templates from 'config/templates';
 import House from './../../models/house';
 import DateRangeSlider from './../../d3/sliders/date_range';
-import {RouteHelper} from './../routes';
 
 class PowerComponent extends React.Component {
 
   constructor(props){
     super(props);
-    var power = this;
-    power.updates = 0;
+    this.state = {
+      loading_power_data: false,
+      house: null,
+      power_range: null
+    };
   }
 
   get house(){
-    console.log('PowerComponent#get house', this.props.location.state && this.props.location.state.house)
-    return this.props.location.state && this.props.location.state.house;
+    return this.state_manager && this.state_manager.state && this.state_manager.state.house;
+  }
+
+  get state_manager(){
+    return this.props.state_manager;
+  }
+
+  get loading_power_data(){
+    return this.props.loading_power_data || this.state.loading_power_data;
   }
 
   componentDidMount(){
-    var power = this,
-      house = power.props.location.state.house;
-
-    console.log(this.updates, ') PowerComponent#componentDidMount')
-    console.log(this.house)
-    power.renders = 0;
-    if (!house) return false;
+    var power = this;
     power.initDateRange();
   }
 
-  componentDidUpdate(prev_props, prev_state, prev_context){
-    this.updates += 1
-    console.log(this.updates, ') PowerComponent#componentDidUpdate')
-    console.log(this.house)
+  componentDidUpdate(prev_props, prev_state){
     var power = this,
-      route_helper = new RouteHelper(power.props);
-    if (!route_helper.house) return false;
-    if (power.shouldInitDateRange(prev_props)) {
+      state_manager = power.state_manager;
+    if (prev_props.month != power.props.month ||
+        prev_props.year != power.props.year ||
+        prev_props.house != power.props.house){
       power.initDateRange();
+      state_manager.powerDataRendered();
     }
   }
 
-  shouldInitDateRange(prev_props){
-    var power = this,
-      route_helper = new RouteHelper(power.props);
-    return !prev_props.location.state.house ||
-              prev_props.location.state.house.data.id != power.context.house.data.id ||
-              !route_helper.house.matchesPowerRange(prev_props.params, prev_props.location.query['dates[]'] || []);
+  syncFromStateManager(fnStateSet){
+    var power = this;
+    power.setState(power.state_manager.state, fnStateSet);
   }
 
   initDateRange(){
     var power = this,
-      house = power.context.house;
+      house = power.house;
     if (power.date_range_slider === undefined){
       power.date_range_slider = new DateRangeSlider({
         container: '#power_date_setter',
@@ -73,10 +72,8 @@ class PowerComponent extends React.Component {
     power.date_range_slider.onRangeUpdated = (min, max)=>{
       if (power.date_range_update) clearTimeout(power.date_range_update);
       power.date_range_update = setTimeout(()=>{
-        var power_range = [Math.round(min.getTime() / 1000), Math.round(max.getTime() / 1000)],
-          route_helper = new RouteHelper(house, power.props, {power_range: power_range});
-
-        route_helper.updateRoute();
+        var power_range = [Math.round(min.getTime() / 1000), Math.round(max.getTime() / 1000)];
+        power.state_manager.setParams({power_range: power_range}, power);
       }, 500);
     };
     power.date_range_slider.drawData({
@@ -89,26 +86,21 @@ class PowerComponent extends React.Component {
 
   setParam(event){
     var power = this,
-      house = power.context.house,
       param = event.target.dataset.param,
       value = event.target.dataset.value,
       update = {}, route_helper;
     update[param] = value;
-    route_helper = new RouteHelper(house, power.props, update);
-    if (route_helper.routeUpdated()){
-      route_helper.updateHouseState();
-      power.context.router.push(route_helper.newRoute());
-    }
+    if (value == power.state_manager.state[param]) return false;
+    power.state_manager.setParams(update, power);
   }
 
   render() {
     var powerRt = Templates.forComponent('power');
     return powerRt.call(this);
   }
+
 }
 
-PowerComponent.contextTypes = {
-  router: React.PropTypes.object.isRequired
-};
+PowerComponent.NAME = 'PowerComponent'
 
-export default PowerComponent;
+module.exports = PowerComponent

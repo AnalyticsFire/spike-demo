@@ -8,30 +8,27 @@ class GraphComponent extends React.Component {
 
   componentDidMount(){
     var power_graph = this;
-    power_graph.graph_title = ' ';
-    if (power_graph.house) power_graph.updateGraph();
+    power_graph.updateGraph();
   }
 
   get house(){
-    return this.props.location.state && this.props.location.state.house;
+    return this.state_manager.state.house;
   }
 
-  componentDidUpdate(prev_props, prev_state, prev_context){
+  get state_manager(){
+    return this.props.state_manager;
+  }
+
+  componentDidUpdate(prev_props, prev_state){
     var power_graph = this;
-    if (power_graph.shouldUpdateGraph(prev_props)) {
+    if (prev_props.house != power_graph.props.house || prev_props.power_range != power_graph.props.power_range){
       power_graph.updateGraph();
     }
   }
 
-  shouldUpdateGraph(prev_props){
-    var power_graph = this;
-    return (power_graph.house && !prev_props.location.state.house ||
-        prev_props.location.state.house.id != power_graph.props.location.state.house.id);
-  }
-
   updateGraph(){
     var power_graph = this,
-      house = power_graph.context.house;
+      house = power_graph.house;
     if (power_graph.graph === undefined){
       power_graph.graph = new SplineStackChart({
         container: '#power_graph',
@@ -87,8 +84,4 @@ class GraphComponent extends React.Component {
 
 }
 
-GraphComponent.contextTypes = {
-  router: React.PropTypes.object.isRequired
-};
-
-export default GraphComponent;
+module.exports = GraphComponent;

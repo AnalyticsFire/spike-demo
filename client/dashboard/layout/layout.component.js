@@ -1,62 +1,67 @@
 import React from 'react';
+import { createHistory } from 'history';
+
+import ObjectUtil from './../../../shared/utils/object';
 import Templates from 'config/templates';
 import House from './../../models/house';
 import PowerDatum from './../../models/power_datum';
-import {RouteHelper} from './../routes';
+import StateManager from './../state_manager';
 
 class LayoutComponent extends React.Component {
 
   constructor(props, context){
     super(props, context);
-    this.renders = 0;
-    this.state = {
+    var layout = this;
+    layout.state = {
+      loading_houses: true,
       houses: null,
       house: null,
-      loading_house_data: true
-    };
-    this.updates = 0
+      dataset: null,
+      year: null,
+      view: null
+    }
   }
 
   get house(){
-    return this.props.location.state && this.props.location.state.house;
+    return this.state_manager && this.state_manager.state.house;
   }
 
   componentDidMount() {
     var layout = this;
     House.ensureHouses().then((houses)=>{
       var house = null;
-      if (layout.props.params.house_id != undefined){
-        house = houses.find((h)=>{ return h.data.id == layout.props.params.house_id; });
-      }
       layout.setState({
-        houses: houses,
-        loading_house_data: false
+          houses: houses,
+          loading_houses: false
         }, ()=>{
-          if (house){
-            var route_helper = new RouteHelper(layout.context.router, layout.props, {house: house});
-            route_helper.updateRoute();
-          }
+          layout.state_manager = new StateManager(layout.props.createHistory, houses);
+          layout.state_manager.history.listen((location)=>{
+            layout.state_manager.updateStateFromUrl(location, layout);
+          });
         });
     });
   }
 
-  componentDidUpdate(){
+  syncFromStateManager(fnStateSet){
     var layout = this;
-
-    this.updates += 1;
-    console.log(this.updates, ') LayoutComponent#componentDidUpdate');
+    layout.setState(layout.state_manager.state, fnStateSet);
   }
 
   setHouse(event){
     var layout = this,
       house_id = event.target.value;
-    if (!layout.house || layout.house.id != house_id){
-      House.ensureHouses().then((houses)=>{
-        var new_house = houses.find((h)=>{ return h.data.id == house_id }),
-          route_helper = new RouteHelper(layout.context.router, layout.props, {house: new_house});
-        route_helper.updateRoute();
-      });
-    }
+    if (layout.state_manager.state.house_id == house_id) return false;
+    layout.state_manager.setParams({house_id: house_id}, layout);
+  }
+
+  setParam(event){
+    var layout = this,
+      param = event.target.dataset.param,
+      value = event.target.dataset.value,
+      update = {};
+    update[param] = value;
+    if (value == layout.state_manager.state[param]) return false;
+    layout.state_manager.setParams(update, layout);
   }
 
   refreshData(){
@@ -77,9 +82,5 @@ class LayoutComponent extends React.Component {
     return layoutRt.call(this);
   }
 }
-
-LayoutComponent.contextTypes = {
-  router: React.PropTypes.object.isRequired
-};
 
 export default LayoutComponent;

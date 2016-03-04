@@ -1,30 +1,33 @@
 import React from 'react';
 import Templates from 'config/templates';
-import {RouteHelper} from './../routes';
 
 class EnergyComponent extends React.Component {
 
   constructor(props){
     super(props);
-    var energy = this;
   }
 
-  componentDidMount(){
-    var energy = this;
+  get state_manager(){
+    return this.props.state_manager;
   }
 
-  componentDidUpdate(prev_props, prev_state, prev_context){
+  get loading_energy_data(){
+    return this.props.loading_energy_data;
+  }
+
+  syncFromStateManager(fnStateSet){
     var energy = this;
+    energy.setState(energy.state_manager.state, fnStateSet);
   }
 
   setParam(event){
     var energy = this,
       param = event.target.dataset.param,
       value = event.target.dataset.value,
-      update = {}, route_helper;
+      update = {};
     update[param] = value;
-    route_helper = new RouteHelper(energy.props, update);
-    if (route_helper.routeUpdated()) route_helper.updateRoute();
+    if (value == energy.state_manager.state[param]) return false;
+    energy.state_manager.setParams(update, energy);
   }
 
   render() {
@@ -32,9 +35,6 @@ class EnergyComponent extends React.Component {
     return energyRt.call(this);
   }
 }
+EnergyComponent.NAME = 'EnergyComponent'
 
-EnergyComponent.contextTypes = {
-  router: React.PropTypes.object.isRequired
-};
-
-export default EnergyComponent;
+module.exports = EnergyComponent;

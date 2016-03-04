@@ -53,11 +53,11 @@ class House {
     else return {};
   }
 
-  availableMonths(){
+  availableMonths(year){
     var  house = this,
-      all_months = moment.monthsShort(),
-      year = house.state.year.toString();
-    if ((year) === house.data_from_moment.format('YYYY')){
+      all_months = moment.monthsShort();
+    year = year || house.state.year.toString();
+    if (year === house.data_from_moment.format('YYYY')){
       return all_months.slice(house.data_from_moment.month(), 12);
     } else if (year === house.data_until_moment.format('YYYY')){
       return all_months.slice(0, house.data_until_moment.month() + 1);
@@ -66,76 +66,89 @@ class House {
     }
   }
 
-  setMonthState(params, power_ranges){
-    var house = this,
-      all_months = moment.monthsShort();
+  // this will mutate params and set house.state.
+  setMonthState(params){
+    var house = this;
+    house.verifyMonthState(params);
+    house.state.month = params.month;
+    house.state.year = params.year;
 
-    if (house.state.month !== params.month || house.state.year != params.year){
-      var new_year = +params.year;
-      if (new_year >= house.data_from_moment.year() && new_year <= house.data_until_moment.year()){
-        house.state.year = params.year;
-      } else if (!house.state.year){
-        house.state.year = house.years[house.years.length - 1];
-      }
-      var available_months = house.availableMonths();
-      if (available_months.indexOf(params.month) >= 0){
-        house.state.month = params.month;
-      } else if (!house.state.month || available_months.indexOf(house.state.month) < 0){
-        house.state.month = available_months[available_months.length - 1];
-      }
-    }
-
-    var month_i = all_months.indexOf(house.state.month),
+    var month_i =  moment.monthsShort().indexOf(house.state.month),
       new_month_moment = moment.tz({year: house.state.year, month: month_i, day: 1}, house.data.timezone).startOf('month');
     if (!house.state.current_month_moment || new_month_moment.unix() !== house.state.current_month_moment.unix()){
       house.state.current_month_moment = new_month_moment;
+      var end_of_month = new_month_moment.clone().endOf('month')
+      house.state.end_of_current_data_moment = end_of_month > house.data_until_moment ? house.data_until_moment : end_of_month
     }
-    house.setDataRanges(power_ranges);
+
+    house.verifyPowerRange(params);
+    house.state.power_range = params.power_range;
+    var energy_max = Math.min(house.state.end_of_current_data_moment.clone().endOf('year').unix(), house.data.data_until);
+    house.state.energy_range = [house.state.end_of_current_data_moment.clone().startOf('year').unix(), energy_max];
   }
 
-  setDataRanges(power_ranges){
-    var house = this,
-        end_of_month = house.state.current_month_moment.clone().endOf('month'),
-        end_of_current_data_moment = end_of_month > house.data_until_moment ? house.data_until_moment : end_of_month,
-        energy_max = Math.min(end_of_current_data_moment.clone().endOf('year').unix(), house.data.data_until);
-    house.state.energy_range = [end_of_current_data_moment.clone().startOf('year').unix(), energy_max];
-    house.state.power_range = house.state.power_range || [];
-    house.state.end_of_current_data_moment = end_of_current_data_moment;
+  // This will mutate params.
+  verifyMonthState(params){
+    var house = this;
 
-    var current_data_range = [house.state.current_month_moment.unix(), end_of_current_data_moment.unix()],
-      power_min = house.state.power_range[0],
-      power_max = house.state.power_range[1];
-    if (power_ranges){
-      if (DateRange.inRange(power_ranges[1], current_data_range)){
-        power_max = power_ranges[1];
+    params.month = params.month || house.state.month;
+    params.year = params.year || house.state.year;
+    if (house.state.month !== params.month || house.state.year != params.year){
+      var new_year = +params.year;
+      if (new_year < house.data_from_moment.year() && new_year > house.data_until_moment.year()){
+        if (house.state.year) params.year = house.state.year;
+        else params.year = house.years[house.years.length - 1];
       }
-      if (DateRange.inRange(power_ranges[0], current_data_range) && power_ranges[0] < power_max){
-        power_min = power_ranges[0];
+
+      var available_months = house.availableMonths(params.year);
+      if (available_months.indexOf(params.month) < 0){
+        if (house.state.month) params.month = house.state.month;
+        else params.month = available_months[available_months.length - 1];
+      }
+    }
+  }
+
+  // This will mutate params
+  verifyPowerRange(params){
+    var house = this,
+      month_i = moment.monthsShort().indexOf(params.month),
+      month_moment = moment.tz({year: params.year, month: month_i, day: 1}, house.data.timezone).startOf('month'),
+      end_of_month = month_moment.clone().endOf('month'),
+      end_of_current_data_moment = end_of_month > house.data_until_moment ? house.data_until_moment : end_of_month;
+
+    params.power_range = params.power_range || [];
+
+    var current_data_range = [month_moment.unix(), end_of_current_data_moment.unix()],
+      power_min = params.power_range[0],
+      power_max = params.power_range[1];
+    if (params.power_range.length > 0){
+      if (DateRange.inRange(params.power_range[1], current_data_range)){
+        power_max = params.power_range[1];
+      }
+      if (DateRange.inRange(params.power_range[0], current_data_range) && params.power_range[0] < power_max){
+        power_min = params.power_range[0];
       }
     }
     if (!power_max || !DateRange.inRange(power_max, current_data_range)){
       power_max = end_of_current_data_moment.unix();
     }
-    if (!power_min || !DateRange.inRange(power_min, current_data_range) ||
-      power_max - power_min > 3600 * 24 * 4){
+    if (!power_min ||
+          !DateRange.inRange(power_min, current_data_range) ||
+          power_max - power_min > 3600 * 24 * 4){
       power_min = power_max - 3600 * 24 * 4;
     }
-    house.state.power_range = [power_min, power_max];
+    params.power_range = [power_min, power_max];
   }
 
-  matchesYearState(params){
+  matchesEnergyState(params){
     var house = this;
     return params.year == house.state.year;
   }
 
-  matchesMonthState(params){
+  matchesPowerState(params){
     var house = this;
-    return params.month == house.state.month && params.year == house.state.year;
-  }
-
-  matchesPowerRange(params, dates){
-    var house = this;
-    return house.matchesMonthState(params) && house.state.power_range[0] == dates[0] && house.state.power_range[1] == dates[1];
+    return params.month === house.state.month && params.year == house.state.year &&
+      house.state.power_range[0] == params.power_range[0] && house.state.power_range[1] == params.power_range[1];
   }
 
   offset_diff(unix){

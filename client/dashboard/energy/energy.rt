@@ -1,5 +1,7 @@
+<rt-require dependency="./graph/graph.component" as="EnergyGraph"/>
+<rt-require dependency="./table/table.component" as="EnergyTable"/>
 <div id="energy_view">
-  <div class="alert alert-warning" rt-if="this.props.location.state.loading_energy_data">
+  <div class="alert alert-warning" rt-if="this.loading_energy_data">
     Retrieving energy data...
   </div>
   <div rt-if="this.props.view === 'graph'">
@@ -8,16 +10,28 @@
       <button
         data-param="graph_attr"
         data-value="consumption"
-        rt-class="{active: this.props.params.graph_attr === 'consumption'}"
-        onClick="{this.setAttr}"
+        rt-class="{active: this.props.graph_attr === 'consumption'}"
+        onClick="{this.setParam.bind(this)}"
         type="button" class="btn btn-primary">Consumption</button>
       <button
         data-param="graph_attr"
         data-value="production"
-        rt-class="{active: this.props.params.graph_attr === 'production'}"
-        onClick="{this.setGraphAttr}"
+        rt-class="{active: this.props.graph_attr === 'production'}"
+        onClick="{this.setParam.bind(this)}"
         type="button" class="btn btn-primary">Production</button>
     </div>
   </div>
-  {this.props.children}
+
+  <EnergyGraph
+    rt-if="this.props.view === 'graph'"
+    house="{this.props.house}"
+    state_manager="{this.props.state_manager}"
+    graph_attr="{this.props.graph_attr}"
+    year="{this.props.year}" ></EnergyGraph>
+  <EnergyTable
+    rt-if="this.props.view === 'table'"
+    state_manager="{this.props.state_manager}"
+    house="{this.props.house}"
+    graph_attr="{this.props.graph_attr}"
+    year="{this.props.year}" ></EnergyTable>
 </div>

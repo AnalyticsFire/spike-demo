@@ -1,11 +1,97 @@
+<rt-require dependency="./../energy/energy.component" as="EnergyComponent"/>
+<rt-require dependency="./../power/power.component" as="PowerComponent"/>
 <div id="layout">
-  <div class="alert alert-warning" rt-if="this.state.loading_house_data">Retrieving houses...</div>
+  <div rt-if="!this.house" id="about">
+    <div class="panel panel-default">
+      <div class="panel-heading">About</div>
+      <div class="panel-body">
+        <p>This is a Spike bundle prototype using the following libraries:</p>
+        <ul>
+          <li>React</li>
+          <li>React Templates</li>
+          <li>React Router</li>
+          <li>LokiJs - persisting API calls to indexedDb</li>
+          <li>Webpack - hot mode developing and app bundling</li>
+          <li>Babel - ES6 transpiler</li>
+        </ul>
+        <p>The demo app consists of a dataset of 10 houses and 10 years of randomly generated power consumption and production at 15 minute intervals. You can toggle between different houses and time periods to compare and contrast the dataset.</p>
+        <p>Select a house below to get started.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning" rt-if="this.state.loading_houses">Retrieving houses...</div>
 
   <h4>Select household:</h4>
-  <select id="houses_select" rt-if="this.state.houses" class="form-control" onChange="{this.setHouse.bind(this)}" value="{this.props.params.house_id}">
+  <select id="houses_select" rt-if="this.state.houses && this.state_manager" class="form-control" onChange="{this.setHouse.bind(this)}" value="{this.house_id}">
     <option rt-repeat="house in this.state.houses" value="{house.data.id}" key="{house.scoped_id}">{house.data.name}</option>
   </select>
   <button rt-if="this.house" onClick="{this.refreshData.bind(this)}" class="btn btn-xs btn-default">Refresh House Data</button>
 
-  {this.props.children}
+  <div rt-if="this.house">
+    <h4>Select dataset:</h4>
+    <div class="btn-group" role="group">
+      <button
+        data-param="dataset"
+        data-value="energy"
+        rt-class="{active: this.state.dataset === 'energy'}"
+        onClick="{this.setParam.bind(this)}"
+        type="button" class="btn btn-primary">Daily Energy Statistics</button>
+      <button
+        data-param="dataset"
+        data-value="power"
+        rt-class="{active: this.state.dataset === 'power'}"
+        onClick="{this.setParam.bind(this)}"
+        type="button" class="btn btn-primary">15-minute Power Statistics</button>
+    </div>
+
+    <h4>View as:</h4>
+    <div class="btn-group" role="group">
+      <button
+        data-param="view"
+        data-value="graph"
+        rt-class="{active: this.state.view === 'graph'}"
+        onClick="{this.setParam.bind(this)}"
+        type="button" class="btn btn-primary">Graph</button>
+      <button
+        data-param="view"
+        data-value="table"
+        rt-class="{active: this.state.view === 'table'}"
+        onClick="{this.setParam.bind(this)}"
+        type="button" class="btn btn-primary">Table</button>
+    </div>
+
+    <div rt-if="this.house">
+      <h4>Select dates:</h4>
+      <div class="btn-group">
+        <button
+          rt-repeat="year in this.house.years"
+          data-param="year"
+          data-value="{year}"
+          key="data-year-{year}"
+          class="btn-info btn btn-sm"
+          rt-class="{active: year == this.state.year}"
+          onClick="{this.setParam.bind(this)}">{year}</button>
+      </div>
+    </div><br/>
+
+    <EnergyComponent
+      rt-if="this.state.dataset === 'energy'"
+      house="{this.state.house}"
+      loading_energy_data="{this.state.loading_energy_data}"
+      state_manager="{this.state_manager}"
+      view="{this.state.view}"
+      graph_attr="{this.state.graph_attr}"
+      year="{this.state.year}" />
+    <PowerComponent
+      rt-if="this.state.dataset === 'power'"
+      house="{this.state.house}"
+      loading_power_data="{this.state.loading_power_data}"
+      state_manager="{this.state_manager}"
+      view="{this.state.view}"
+      month="{this.state.month}"
+      year="{this.state.year}"
+      power_range="{this.state.power_range}" />
+  </div>
+
 </div>

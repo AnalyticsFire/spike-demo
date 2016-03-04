@@ -1,4 +1,5 @@
-import {browserHistory} from 'react-router';
+import { createHistory, useQueries } from 'history'
+
 import app from './../../app';
 
-app(browserHistory);
+app(useQueries(createHistory));

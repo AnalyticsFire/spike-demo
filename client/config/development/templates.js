@@ -3,8 +3,6 @@
 
 import fs from 'fs';
 
-import aboutRt from './../../dashboard/about/about.rt';
-import houseRt from './../../dashboard/house/house.rt';
 import layoutRt from './../../dashboard/layout/layout.rt';
 import energyRt from './../../dashboard/energy/energy.rt';
 import energyGraphRt from './../../dashboard/energy/graph/graph.rt';
@@ -14,8 +12,6 @@ import powerGraphRt from './../../dashboard/power/graph/graph.rt';
 import powerTableRt from './../../dashboard/power/table/table.rt';
 
 const TEMPLATES = {
-  about: aboutRt,
-  house: houseRt,
   layout: layoutRt,
   energy: energyRt,
   energy_graph: energyGraphRt,

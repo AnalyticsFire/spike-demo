@@ -8,27 +8,29 @@ class GraphComponent extends React.Component {
 
   componentDidMount(){
     var energy_graph = this;
-    if (energy_graph.house) energy_graph.updateGraph();
+    energy_graph.updateGraph();
   }
 
   get house(){
-    return this.props.location.state && this.props.location.state.house;
+    return this.props.house;
   }
 
-  componentDidUpdate(prev_props, prev_state, prev_context){
-    var energy_graph = this;
-    if (energy_graph.shouldUpdateGraph(prev_props)) { energy_graph.updateGraph(); }
+  get state_manager(){
+    return this.props.state_manager;
   }
 
-  shouldUpdateGraph(prev_props){
+  componentDidUpdate(prev_props, prev_state){
     var energy_graph = this;
-    return energy_graph.house && !prev_props.location.state.house ||
-        prev_props.location.state.house.id != energy_graph.house.id;
+    if (prev_props.house != energy_graph.props.house ||
+          prev_props.year != energy_graph.props.year ||
+          prev_props.graph_attr != energy_graph.props.graph_attr){
+      energy_graph.updateGraph();
+    }
   }
 
   updateGraph(){
     var energy_graph = this,
-      graph_attr = energy_graph.props.params.graph_attr;
+      graph_attr = energy_graph.props.graph_attr;
 
     if (energy_graph.graph === undefined){
       energy_graph.graph = new CalendarGridChart({
@@ -68,8 +70,4 @@ class GraphComponent extends React.Component {
 
 }
 
-GraphComponent.contextTypes = {
-  router: React.PropTypes.object.isRequired
-};
-
-export default GraphComponent;
+module.exports = GraphComponent;

@@ -1,4 +1,4 @@
-<table id="power_table" class="table" rt-if="this.context.house">
+<table id="power_table" class="table">
   <thead>
     <tr>
       <th></th>
@@ -8,7 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr rt-repeat="power_datum in this.context.house.power_data" key="{power_datum.scoped_id}">
+    <tr rt-repeat="power_datum in this.house.power_data" key="{power_datum.scoped_id}">
       <td></td>
       <td>{power_datum.time_to_s}</td>
       <td>{power_datum.consumption_to_s}</td>
