@@ -1,5 +1,5 @@
-<rt-require dependency="./../energy/energy.component" as="EnergyComponent"/>
-<rt-require dependency="./../power/power.component" as="PowerComponent"/>
+<rt-require dependency="./../energy/energy.component" as="Energy"/>
+<rt-require dependency="./../power/power.component" as="Power"/>
 <div id="layout">
   <div rt-if="!this.house" id="about">
     <div class="panel panel-default">
@@ -75,16 +75,16 @@
       </div>
     </div><br/>
 
-    <EnergyComponent
-      rt-if="this.state.dataset === 'energy'"
+    <Energy
+      rt-if="this.should_show_energy_data"
       house="{this.state.house}"
       loading_energy_data="{this.state.loading_energy_data}"
       state_manager="{this.state_manager}"
       view="{this.state.view}"
       graph_attr="{this.state.graph_attr}"
       year="{this.state.year}" />
-    <PowerComponent
-      rt-if="this.state.dataset === 'power'"
+    <Power
+      rt-if="this.should_show_power_data"
       house="{this.state.house}"
       loading_power_data="{this.state.loading_power_data}"
       state_manager="{this.state_manager}"

@@ -3,12 +3,6 @@ var path = require('path');
 module.exports = function (config) {
   config.set({
     browsers: ['PhantomJS'],
-    //coverageReporter: {
-    //  reporters: [
-    //    { type: 'html', subdir: 'html' },
-    //    { type: 'lcovonly', subdir: '.' },
-    //  ],
-    // },
     files: [
       'tests.webpack.js',
     ],
@@ -32,15 +26,7 @@ module.exports = function (config) {
             query: {
               cacheDirectory: true,
             },
-          }/*, {
-            test: /\.js?$/,
-            include: /(client|shared)/,
-            exclude: /(node_modules|spec)/,
-            loader: 'babel-istanbul',
-            query: {
-              cacheDirectory: true,
-            },
-          }*/
+          }
         ],
         loaders: [
           {
@@ -49,8 +35,8 @@ module.exports = function (config) {
             exclude: /(node_modules|spec)/,
             loader: 'babel',
             query: {
-              cacheDirectory: true,
-            },
+              cacheDirectory: true
+            }
           }, {
             test: /\.json$/,
             loader: 'json'

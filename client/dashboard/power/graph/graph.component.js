@@ -6,17 +6,17 @@ import SplineStackChart from './../../../d3/line/spline_stack';
 
 class GraphComponent extends React.Component {
 
-  componentDidMount(){
-    var power_graph = this;
-    power_graph.updateGraph();
-  }
-
   get house(){
     return this.state_manager.state.house;
   }
 
   get state_manager(){
     return this.props.state_manager;
+  }
+
+  componentDidMount(){
+    var power_graph = this;
+    power_graph.updateGraph();
   }
 
   componentDidUpdate(prev_props, prev_state){
@@ -83,5 +83,7 @@ class GraphComponent extends React.Component {
   }
 
 }
+
+GraphComponent.NAME = 'PowerGraph';
 
 module.exports = GraphComponent;

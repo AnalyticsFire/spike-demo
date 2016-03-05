@@ -26,6 +26,14 @@ class LayoutComponent extends React.Component {
     return this.state_manager && this.state_manager.state.house;
   }
 
+  get should_show_energy_data(){
+    return this.state.dataset === 'energy' && this.house && this.house.energy_data;
+  }
+
+  get should_show_power_data(){
+    return this.state.dataset === 'power' && this.house && this.house.power_data;
+  }
+
   componentDidMount() {
     var layout = this;
     House.ensureHouses().then((houses)=>{
@@ -83,4 +91,6 @@ class LayoutComponent extends React.Component {
   }
 }
 
-export default LayoutComponent;
+LayoutComponent.NAME = 'Layout';
+
+module.exports = LayoutComponent;

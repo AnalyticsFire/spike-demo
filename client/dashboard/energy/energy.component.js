@@ -35,6 +35,6 @@ class EnergyComponent extends React.Component {
     return energyRt.call(this);
   }
 }
-EnergyComponent.NAME = 'EnergyComponent'
+EnergyComponent.NAME = 'Energy';
 
 module.exports = EnergyComponent;

@@ -6,9 +6,3 @@ testsContext.keys().forEach(testsContext);
 
 require('./client/models/house');
 require('./shared/utils/date_range');
-
-/*
-var srcContext = require.context('./client', true, /\.js$/);
-srcContext.keys().forEach(srcContext);*/
-
-

@@ -70,4 +70,6 @@ class GraphComponent extends React.Component {
 
 }
 
+GraphComponent.NAME = 'EnergyGraph';
+
 module.exports = GraphComponent;

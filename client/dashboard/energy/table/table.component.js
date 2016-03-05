@@ -20,4 +20,6 @@ class TableComponent extends React.Component {
 
 }
 
+TableComponent.NAME = 'EnergyTable';
+
 module.exports = TableComponent;

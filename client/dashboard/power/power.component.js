@@ -37,8 +37,8 @@ class PowerComponent extends React.Component {
   componentDidUpdate(prev_props, prev_state){
     var power = this,
       state_manager = power.state_manager;
-    if (prev_props.month != power.props.month ||
-        prev_props.year != power.props.year ||
+    if (prev_props.power_range[0] != power.props.power_range[0] ||
+        prev_props.power_range[1] != power.props.power_range[1] ||
         prev_props.house != power.props.house){
       power.initDateRange();
       state_manager.powerDataRendered();
@@ -101,6 +101,6 @@ class PowerComponent extends React.Component {
 
 }
 
-PowerComponent.NAME = 'PowerComponent'
+PowerComponent.NAME = 'Power';
 
-module.exports = PowerComponent
+module.exports = PowerComponent;

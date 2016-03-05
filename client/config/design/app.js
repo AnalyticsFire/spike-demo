@@ -1,6 +1,7 @@
 import Styles from 'config/styles';
 import Templates from 'config/templates';
-import {hashHistory} from 'react-router';
+import createHistory from 'history/lib/createHashHistory';
+import { useQueries } from 'history';
 import app from './../../app';
 
 Promise.all([
@@ -8,5 +9,5 @@ Promise.all([
   Styles.sync()
 ]).then(()=>{
   jQuery('#compiling_layouts').remove();
-  app(hashHistory);
+  app(useQueries(createHistory));
 });

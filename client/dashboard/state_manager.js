@@ -44,7 +44,7 @@ class StateManager {
   }
 
   // This will update the house state acccording to passed update parameters.
-  updateHouseFromState(component){
+  updateHouseFromState(component, fnResolve){
     var state_manager = this,
       house = state_manager.state.house,
       promise;
@@ -133,26 +133,23 @@ class StateManager {
 
   updateStateFromUrl(location, component){
     var state_manager = this;
-    return new Promise((fnResolve, fnReject)=>{
-      var params = state_manager.parseUrl(location.pathname),
-        house = null;
-      if (params.dataset === 'power' && location.query.dates) {
-        params.power_range = [+location.query.dates[0], +location.query.dates[1]];
-      }
-      if (params.house_id || params.house_id != state_manager.state.house_id){
-        house = state_manager.houses.find((h)=>{ return h.data.id == params.house_id; });
-      }
-      state_manager.state.house = house;
-      Object.assign(state_manager.state, params);
-      if (state_manager.state.house_id) {
-        state_manager.updateHouseFromState(component);
-      } else {
-        component.syncFromStateManager(()=>{
-          state_manager.update_in_progress = false;
-          fnResolve();
-        });
-      }
-    });
+    var params = state_manager.parseUrl(location.pathname),
+      house = null;
+    if (params.dataset === 'power' && location.query.dates) {
+      params.power_range = [+location.query.dates[0], +location.query.dates[1]];
+    }
+    if (params.house_id || params.house_id != state_manager.state.house_id){
+      house = state_manager.houses.find((h)=>{ return h.data.id == params.house_id; });
+    }
+    state_manager.state.house = house;
+    Object.assign(state_manager.state, params);
+    if (state_manager.state.house_id) {
+      state_manager.updateHouseFromState(component);
+    } else {
+      component.syncFromStateManager(()=>{
+        state_manager.update_in_progress = false;
+      });
+    }
   }
 
   parseUrl(url, query){

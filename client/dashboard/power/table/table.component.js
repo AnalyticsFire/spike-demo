@@ -19,4 +19,6 @@ class TableComponent extends React.Component {
   }
 }
 
+TableComponent.NAME = 'PowerTable';
+
 module.exports = TableComponent;
