@@ -89,7 +89,7 @@ The designer can change React templates and sass files in `/dashboard`. Refresh 
 Tests are currently limited to critical utility functions. Integration tests, especially focused on data caching, should be added at a later more stable state.
 
 ```sh
-jasmine
+karma start
 ```
 
 ## App Summary
@@ -102,6 +102,7 @@ Two main purposes for this app structure and set of dependencies:
 The functionality and structure of the app reflect usage of the following libraries:
 - [LokiJs](http://lokijs.org/#/): A client side no-SQL database. Persists data in memory and can be written to browser storage with `db#save()`. The in memory data can then be cleared with `Databasable#closeDb()` - see `client/lib/databasable.js`.
 - [ReactJs](https://facebook.github.io/react/).
+- [History](https://github.com/mjackson/history). Javascript API for client side routing. Framework agnostic.
 - [React Templates](http://wix.github.io/react-templates/): This library compiles a lightly extended HTML syntax to React Js. This is viewed as a better alternative to JSX, since it more closely reflects native HTML (see #2 above) and more easily enables separation between code and view.
 - [Babel](https://babeljs.io/): Compiles ES6 (or even ES7) to ES5 for browser compatibility.
 - [Webpack](https://webpack.github.io/): Javascript module bundler. Compiles dependencies and repository code to single file, which can be optimized or run in development for easy debugging. Can also compile sass assets. Configurable for different options. See `client/config/:environment/webpack.js` for our configuration files.
