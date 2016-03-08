@@ -24,16 +24,20 @@ class PowerDatum {
     return house.toDate(power_datum.data.time);
   }
 
+  get net_consumption(){
+    return Math.max(0, Math.round(this.data.consumption - this.data.production));
+  }
+
   get time_to_s(){
     var power_datum = this,
       moment_tz = moment.tz(power_datum.data.time * 1000, power_datum.house.data.timezone);
     return moment_tz.format('YYYY-MM-DD HH:mm');
   }
-  get consumption_to_s(){
+  get consumption(){
     var power_datum = this;
     return Math.round(power_datum.data.consumption);
   }
-  get production_to_s(){
+  get production(){
     var power_datum = this;
     return Math.round(power_datum.data.production);
   }

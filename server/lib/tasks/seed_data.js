@@ -5,20 +5,22 @@ import fs from 'fs';
 import MathUtils from "./../../../shared/utils/math"
 import DB from './../../config/database';
 
-const DATA_PATH = __dirname + '/../../../shared/data/'
+const DATA_PATH = __dirname + '/../../data/'
 
 export class PowerDataSeed {
 
   static saveCsv(opts, done){
     opts = extend({
-      path: DATA_PATH + "power_data.csv"
+      path: "power_data.csv",
+      house_id: null
     }, opts || {});
+    opts.path = DATA_PATH + opts.path;
     var stream = fs.createReadStream(opts.path),
-      csvStream = csv.fromStream(stream, {headers: ['house_id', 'time', 'consumption', 'production']}),
+      csvStream = csv.fromStream(stream, {headers: ['time', 'consumption', 'production']}),
       rows = [];
 
     csvStream.on("data", function(data){
-      data.time = data.time;
+      data.house_id = opts.house_id
       rows.push(data);
       if (rows.length % 100 === 0){
         DB.PowerDatum.bulkCreate(rows, {validate: true}).catch((error)=>{
@@ -31,13 +33,8 @@ export class PowerDataSeed {
     csvStream.on("end", function(){
       console.log("all rows parsed")
       DB.PowerDatum.bulkCreate(rows, {validate: true}).then(()=>{
-        return DB.House.findAll().then((houses)=>{
-          var promises = [];
-          for (var house of houses){
-            var p = house.aggregatePowerToEnergyData();
-            promises.push(p);
-          }
-          return Promise.all(promises);
+        return DB.House.findOne({where: {id: opts.house_id}}).then((house)=>{
+          return house.aggregatePowerToEnergyData();
         });
       }).then(()=>{
         console.log("DONE!")
@@ -51,32 +48,31 @@ export class PowerDataSeed {
       end_date: moment().unix(),
       interval: 900, // every 15 minutes (in s)
       average: 1400, // Wh
-      path: DATA_PATH + "power_data.csv"
+      path: "power_data.csv"
     }, opts || {});
-console.log(opts.start_date, opts.end_date)
+    opts.path = DATA_PATH + opts.path;
+    opts.production_multiplier = parseFloat(opts.production_multiplier);
+
     var row_date = opts.start_date,
       csvStream = csv.format({headers: true}),
-      writableStream = fs.createWriteStream(opts.path),
-      house_ids = opts.house_ids.split(",")
+      writableStream = fs.createWriteStream(opts.path);
 
-    DB.House.findAll({where: {id: house_ids}}).then((houses)=>{
+    csvStream.pipe(writableStream);
+    writableStream.on("finish", ()=>{
+      console.log("DONE!")
+      done();
+    });
 
-      csvStream.pipe(writableStream);
-      writableStream.on("finish", ()=>{
-        console.log("DONE!")
-        done();
-      });
-
-      while (row_date <= opts.end_date){
-        for (var house of houses){
+    DB.House.findOne({where: {id: opts.house_id}})
+      .then((house)=>{
+        while (row_date <= opts.end_date){
           var consumption =  MathUtils.normal(opts.average),
             production = MathUtils.normal(opts.average) * house.productionMultiplier(row_date * 1000);
-          csvStream.write([house.id, row_date, consumption, production]);
+          csvStream.write([row_date, consumption, production]);
+          row_date += opts.interval;
         }
-        row_date += opts.interval;
-      }
-      csvStream.end();
-    });
+        csvStream.end();
+      })
   }
 }
 
@@ -86,7 +82,7 @@ export class HouseSeed {
       path: DATA_PATH + "houses.csv"
     }, opts || {});
     var stream = fs.createReadStream(opts.path),
-      csvStream = csv.fromStream(stream, {headers: ['id', 'name', 'timezone']}),
+      csvStream = csv.fromStream(stream, {headers: ['id', 'name', 'production_multiplier', 'timezone']}),
       rows = [];
 
     csvStream.on("data", function(data){

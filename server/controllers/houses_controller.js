@@ -6,7 +6,7 @@ class HousesController {
 
   static index(req, res){
     var params = {};
-    if (req.query.ids) query.id = ids;
+    if (req.query.ids) params.id = ids;
     DB.House.findAll({where: params}).then((houses)=>{
       res.json({data: houses.map((house)=>{ return house.dataValues; })});
     });

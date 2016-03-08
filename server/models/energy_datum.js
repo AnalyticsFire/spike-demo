@@ -17,6 +17,7 @@ var EnergyDatum = DB.sequelize.define(NAME, {
   day: {
     type: DB.Sequelize.INTEGER,
   },
+  irradiance: DB.Sequelize.FLOAT,
   production: DB.Sequelize.FLOAT,
   consumption: DB.Sequelize.FLOAT
 }, {
@@ -34,8 +35,6 @@ var EnergyDatum = DB.sequelize.define(NAME, {
     exposeForHouseAtDates: (house_id, dates)=>{
       var params = {house_id: house_id};
       extend(params, ApiHelper.datesParamToSequelize(dates, 'day'));
-      console.log('EnergyDatum#exposeForHouseAtDates')
-      console.log(params, dates)
       return EnergyDatum.findAll({
         where: params,
         attributes: ['id', 'production', 'consumption', 'day']

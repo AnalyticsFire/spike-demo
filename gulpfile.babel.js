@@ -2,11 +2,12 @@ import gulp from 'gulp';
 import yargs from 'yargs';
 import webpack from 'webpack';
 import gutil from 'gulp-util';
-import gulpCopy from 'gulp-copy'
+import gulpCopy from 'gulp-copy';
 import fs from 'fs';
 
 import FsHelper from './server/lib/fs_helper';
 import ComponentMapWriter from './server/lib/tasks/component_map_writer';
+import DesignDataGenerator from './server/lib/tasks/design_data_generator';
 import BuildDashboardAssets from './server/lib/tasks/build_dashboard_assets';
 import DB from './server/config/database';
 import {PowerDataSeed, HouseSeed} from './server/lib/tasks/seed_data';
@@ -16,6 +17,19 @@ gulp.task('generate_power_csv', function(done){
     PowerDataSeed.generateCsv(yargs.argv, done);
   });
 });
+
+gulp.task('generate_design_data', function(){
+  var exec = require('child_process').exec,
+    house_ids = yargs.argv.house_ids.split(','),
+    start_date = parseInt(yargs.argv.start_date),
+    end_date = parseInt(yargs.argv.end_date),
+    data_generator = new DesignDataGenerator(house_ids, [start_date, end_date]);
+  return DB.sync()
+          .then(()=>{
+            return data_generator.exec();
+          });
+});
+
 
 gulp.task('save_power_csv', function(done){
   DB.sync().then(()=>{
@@ -53,9 +67,7 @@ gulp.task('build', function(done) {
           var path = 'client/build/design/dashboard';
           // copy all react templates and their styles sheets into build/design/dashboard.
           FsHelper.rmdirAsync(path, ()=>{
-            console.log('path removed')
             fs.mkdir(path, ()=>{
-              console.log('path recreated')
               gulp.src([
                 `client/app.scss`
               ]).pipe(gulpCopy(path, {prefix: 1}));
@@ -65,7 +77,6 @@ gulp.task('build', function(done) {
                 var files_to_copy = files.filter((file)=>{
                   return /\.(rt|scss)$/.test(file)
                 });
-                console.log(files_to_copy)
                 gulp.src(files_to_copy)
                   .pipe(gulpCopy(path, {prefix: 2}));
                 done()
