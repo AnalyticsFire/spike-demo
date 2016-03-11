@@ -5,9 +5,14 @@ const NAME = 'EnergyController';
 class EnergyController{
 
   static index(req, res){
-    DB.EnergyDatum.exposeForHouseAtDates(req.query.house_id, req.query.dates).then((energy_data)=>{
-      res.json({data: energy_data});
-    });
+    console.log ('EnergyController.index');
+    console.log(JSON.stringify(req.body))
+    console.log(JSON.stringify(req.params))
+    console.log(JSON.stringify(req.query))
+    DB.EnergyDatum.exposeForHouseAtDates(req.body)
+      .then((energy_data)=>{
+        res.json({data: energy_data});
+      });
   }
 
 }

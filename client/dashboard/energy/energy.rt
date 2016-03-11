@@ -1,9 +1,6 @@
 <rt-require dependency="./graph/graph.component" as="EnergyGraph"/>
 <rt-require dependency="./table/table.component" as="EnergyTable"/>
 <div id="energy_view">
-  <div class="alert alert-warning" rt-if="this.loading_energy_data">
-    Retrieving energy data...
-  </div>
   <div rt-if="this.props.view === 'graph'">
     <h4>Select Data</h4>
     <div class="btn-group" role="group">

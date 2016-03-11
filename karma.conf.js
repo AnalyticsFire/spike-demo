@@ -48,6 +48,9 @@ module.exports = function (config) {
           api: __dirname + '/client/api/development',
           config: __dirname + '/client/config/development'
         }
+      },
+      node: {
+        fs: "empty"
       }
     },
   });

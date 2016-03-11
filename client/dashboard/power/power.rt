@@ -1,33 +1,18 @@
 <rt-require dependency="./graph/graph.component" as="PowerGraph"/>
 <rt-require dependency="./table/table.component" as="PowerTable"/>
 <div id="power_view">
-  <div class="btn-group">
-    <button
-      rt-if="this.house"
-      rt-repeat="month in this.house.availableMonths()"
-      data-param="month"
-      data-value="{month}"
-      key="data-month-{month}"
-      class="btn-warning btn btn-sm"
-      rt-class="{active: month === this.house.state.month}"
-      onClick="{this.setParam.bind(this)}">{month}</button>
-  </div>
-  <div class="alert alert-warning" rt-if="this.loading_power_data">
-    Retrieving power data...
-  </div>
-  <div id="power_date_setter"></div>
   <PowerGraph
     rt-if="this.props.view === 'graph'"
     state_manager="{this.props.state_manager}"
     house="{this.props.house}"
     month="{this.props.month}"
     year="{this.props.year}"
-    power_range="{this.props.power_range}" ></PowerGraph>
+    date_interval="{this.props.date_interval}" ></PowerGraph>
   <PowerTable
     rt-if="this.props.view === 'table'"
     state_manager="{this.props.state_manager}"
     house="{this.props.house}"
     month="{this.props.month}"
     year="{this.props.year}"
-    power_range="{this.props.power_range}" ></PowerTable>
+    date_interval="{this.props.date_interval}" ></PowerTable>
 </div>

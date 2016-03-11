@@ -6,8 +6,10 @@ class EnergyDataApi {
 
   static index(params){
     return jQuery.ajax({
-      url: ENDPOINT + '?' + jQuery.param(params),
-      type: 'GET',
+      url: ENDPOINT,
+      data: JSON.stringify(params),
+      contentType: 'application/json',
+      type: 'POST',
       dataType: 'json'
     }).then((res)=>{
       return res.data;

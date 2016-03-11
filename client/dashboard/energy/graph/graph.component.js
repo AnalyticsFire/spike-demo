@@ -1,4 +1,5 @@
 import React from 'react';
+import c3 from 'c3';
 
 import Templates from 'config/templates';
 import CalendarGridChart from './../../../d3/grid/calendar_grid';

@@ -1,0 +1,18 @@
+<table id="irradiance_table" class="table">
+  <thead>
+    <tr>
+      <th>Day</th>
+      <th>House</th>
+      <th>Daily Mean Irradiance (W/m<sup>2</sup>)</th>
+      <th>Production (kWh)</th>
+    </tr>
+  </thead>
+  <tbody rt-repeat="day in Object.keys(this.state_manager.irradiance_data)" key="irradiance-date-{day}">
+    <tr rt-repeat="energy_datum in this.state_manager.irradiance_data[day]" key="{energy_datum.scoped_id}">
+      <td>{energy_datum.day_to_s}</td>
+      <td>{energy_datum.house.data.name}</td>
+      <td>{energy_datum.irradiance}</td>
+      <td>{energy_datum.production}</td>
+    </tr>
+  </tbody>
+</table>

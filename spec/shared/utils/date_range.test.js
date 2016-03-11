@@ -421,4 +421,14 @@ describe('DateRange.addRange', ()=>{
     });
   });
 
+  describe('overlapping in the middle', ()=>{
+    it('should not return any new ranges', ()=>{
+      var new_range = [date1, date2],
+        ranges = [[date1, date2], [date3, date4], [date5, date6]],
+        result = DateRange.addRange(new_range, ranges);
+      expect(result.gaps_filled).toEqual([]);
+      expect(result.new_ranges).toEqual([[date1, date2], [date3, date4], [date5, date6]]);
+    });
+  });
+
 });

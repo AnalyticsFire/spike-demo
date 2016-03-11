@@ -7,19 +7,21 @@ const DEFAULTS = {
 
 var databasable = {
 
-  accessDb: function(db_name, opts){
-    var databasable = this;
-    opts = Object.assign(Object.assign({
-      adapter: new LokiIndexedAdapter(db_name)
-    }, DEFAULTS), opts || {});
+  accessDb: function(db_name){
+    var databasable = this,
+      opts = Object.assign({
+        adapter: new LokiIndexedAdapter(db_name)
+      }, DEFAULTS, databasable.lokijs_options || {}),
+      has_adapter = !!opts.adapter;
     return new Promise((fnResolve, fnReject)=>{
       if (!databasable.db) {
         databasable.db = new Loki(db_name, opts);
-        databasable.db.loadDatabase({}, ()=>{
-          fnResolve(databasable.db);
-        });
+        if (has_adapter){
+          databasable.db.loadDatabase({}, ()=>{
+            fnResolve(databasable.db);
+          });
+        } else { fnResolve(databasable.db); }
       } else { fnResolve(databasable.db); }
-
     });
   },
 
@@ -34,8 +36,12 @@ var databasable = {
 
   collection: function(db_name, collection_name, options){
     var databasable = this;
+    options = options || {};
     return databasable.accessDb(db_name)
         .then((db)=>{
+          if (!db || db !== databasable.db){
+            throw new Error('Databasable does not have db set.')
+          }
           var collection = db.getCollection(collection_name)
           if (!collection){
             collection = db.addCollection(collection_name, options);

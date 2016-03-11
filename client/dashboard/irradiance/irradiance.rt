@@ -1,0 +1,13 @@
+<rt-require dependency="./graph/graph.component" as="IrradianceGraph"/>
+<rt-require dependency="./table/table.component" as="IrradianceTable"/>
+<div id="irradiance_view">
+  <h4>Irradiance</h4>
+  <IrradianceGraph
+    rt-if="this.props.view === 'graph'"
+    state_manager="{this.state_manager}"
+    date_interval="{this.props.date_interval}" />
+  <IrradianceTable
+    rt-if="this.props.view === 'table'"
+    state_manager="{this.state_manager}"
+    date_interval="{this.props.date_interval}" />
+</div>

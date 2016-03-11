@@ -18,19 +18,6 @@ gulp.task('generate_power_csv', function(done){
   });
 });
 
-gulp.task('generate_design_data', function(){
-  var exec = require('child_process').exec,
-    house_ids = yargs.argv.house_ids.split(','),
-    start_date = parseInt(yargs.argv.start_date),
-    end_date = parseInt(yargs.argv.end_date),
-    data_generator = new DesignDataGenerator(house_ids, [start_date, end_date]);
-  return DB.sync()
-          .then(()=>{
-            return data_generator.exec();
-          });
-});
-
-
 gulp.task('save_power_csv', function(done){
   DB.sync().then(()=>{
     PowerDataSeed.saveCsv(yargs.argv, done);
@@ -41,6 +28,15 @@ gulp.task('save_house_csv', function(done){
   DB.sync().then(()=>{
     HouseSeed.saveCsv(yargs.argv, done);
   });
+});
+
+gulp.task('generate_design_data', function(){
+  var house_ids = yargs.argv.house_ids.split(','),
+    start_date = parseInt(yargs.argv.start_date),
+    end_date = parseInt(yargs.argv.end_date),
+    data_generator = new DesignDataGenerator(house_ids, [start_date, end_date]);
+  return DB.sync()
+          .then(()=>{ return data_generator.exec(); });
 });
 
 // right now, build only available for design.

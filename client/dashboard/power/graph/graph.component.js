@@ -1,8 +1,8 @@
 import React from 'react';
 import Templates from 'config/templates';
+import c3 from 'c3';
 
 import House from './../../../models/house';
-import c3 from 'c3';
 
 class GraphComponent extends React.Component {
 
@@ -21,7 +21,7 @@ class GraphComponent extends React.Component {
 
   componentDidUpdate(prev_props, prev_state){
     var power_graph = this;
-    if (prev_props.house != power_graph.props.house || prev_props.power_range != power_graph.props.power_range){
+    if (prev_props.house != power_graph.props.house || prev_props.date_interval != power_graph.props.date_interval){
       power_graph.updateGraph();
     }
   }

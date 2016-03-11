@@ -24,10 +24,10 @@ var api = express();
 
 DB.sync().then(()=>{
 
-  routes(api);
-
   api.use(bodyParser.json());
-  api.use(bodyParser.urlencoded({ extended: false }));
+  api.use(bodyParser.urlencoded({ extended: true }));
+
+  routes(api);
 
   api.listen(API_PORT, () => {
     console.log(`API is now running on http://localhost:${API_PORT}`);

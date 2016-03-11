@@ -17,7 +17,9 @@ class DateRange {
           if (end && !DateRange.eq(end, range[0]) && DateRange.lte(end, range[0])){
             new_ranges.push([last_start, end]);
             new_ranges.push(range);
-            gaps_filled.push([last_end, end]);
+            if (!DateRange.eq(end, last_end)){
+              gaps_filled.push([last_end, end]);
+            }
             covered = true;
           } else if (end && !DateRange.gte(end, range[1])) {
             new_ranges.push([last_start, range[1]]);

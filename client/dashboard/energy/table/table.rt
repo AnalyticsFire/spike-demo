@@ -4,6 +4,7 @@
       <th></th>
       <th>Day</th>
       <th>Consumption (kWh)</th>
+      <th>Daily Mean Irradiance (W/m<sup>2</sup>)</th>
       <th>Production (kWh)</th>
     </tr>
   </thead>
@@ -11,8 +12,9 @@
     <tr rt-repeat="energy_datum in this.house.energy_data" key="{energy_datum.scoped_id}">
       <td></td>
       <td>{energy_datum.day_to_s}</td>
-      <td>{energy_datum.consumption_to_s}</td>
-      <td>{energy_datum.production_to_s}</td>
+      <td>{energy_datum.consumption}</td>
+      <td>{energy_datum.irradiance}</td>
+      <td>{energy_datum.production}</td>
     </tr>
   </tbody>
 </table>
