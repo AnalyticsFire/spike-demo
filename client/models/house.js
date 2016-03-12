@@ -276,7 +276,7 @@ class House {
           var required_ids = ids ? ArrayUtil.diff(ids, houses_data.map((data)=>{ return data.id; })) : undefined;
           return HousesApi.index({id: ids})
             .then((required_houses)=>{
-              required_houses.forEach((house_data)=>{
+              (required_houses || []).forEach((house_data)=>{
                 house_collection.insert(house_data);
               });
               House.db.save();

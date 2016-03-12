@@ -13,7 +13,6 @@ class Styles {
       });
       all.push(done);
     }
-    var app_styles =
     all.push(Styles.addAppCss()
       .then((result)=>{ if(result)css += result; }));
     return Promise.all(all)
@@ -25,7 +24,11 @@ class Styles {
   static addCss(view, fnResolve){
     return jQuery.ajax({
       url: COMPONENT_MAP[view] + '.scss'
-    }).then((scss)=>{
+    })
+    .fail(()=>{
+      fnResolve('');
+    })
+    .then((scss)=>{
       var sass = new Sass();
       if (!scss) return fnResolve("");
       sass.compile(scss, (result, a)=>{
@@ -38,7 +41,11 @@ class Styles {
     return new Promise((fnResolve, fnReject)=>{
       jQuery.ajax({
         url: '/dashboard/app.scss'
-      }).then((scss)=>{
+      })
+      .fail(()=>{
+        fnResolve('');
+      })
+      .then((scss)=>{
         var sass = new Sass();
         sass.compile(scss, (result, a)=>{
           fnResolve(result.text);

@@ -65,6 +65,7 @@ class EnergyDatum {
 
     // get all data needed for all houses in one call.
     return new Promise((fnResolve, fnReject)=>{
+      console.log(params)
       EnergyDataApi.index({houses: params})
         .then((energy_data)=>{
           energy_data = energy_data.reduce((grouped, energy_datum)=>{

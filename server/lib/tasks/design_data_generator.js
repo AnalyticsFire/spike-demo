@@ -102,8 +102,10 @@ class DesignDataGenerator {
   }
 
   static energyIndex(opts){
-    return DB.EnergyDatum.exposeForHouseAtDates(opts.house_id, opts.dates)
+    return DB.EnergyDatum.exposeForHouseAtDates(opts)
       .then((energy_data)=>{
+        console.log('Energy data length')
+        console.log(energy_data.length)
         return JSON.stringify({data: energy_data});
       });
   }
